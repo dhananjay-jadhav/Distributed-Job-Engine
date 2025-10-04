@@ -9,13 +9,16 @@
     "build": {
       "dependsOn": ["gen-types"]
     },
-    "gen-types" : {
+    "test": {
+      "dependsOn": ["gen-types"]
+    },
+    "gen-types": {
       "command": "prisma generate",
       "options": {
         "cwd": "libs/auth-db/src/lib"
       }
     },
-    "migrate-prisma" : {
+    "migrate-prisma": {
       "command": "prisma migrate dev",
       "options": {
         "cwd": "libs/auth-db/src/lib"
