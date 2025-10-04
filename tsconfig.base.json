@@ -8,13 +8,22 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": false,
     "target": "es2015",
     "module": "esnext",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@jobber/auth-db": [
+        "libs/auth-db/src/index.ts"
+      ],
+      "@jobber/common-utils": [
+        "libs/common-utils/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

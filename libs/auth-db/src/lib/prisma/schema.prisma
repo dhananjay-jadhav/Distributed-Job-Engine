@@ -1,0 +1,16 @@
+generator client {
+    provider = "prisma-client-js"
+    output = "../../../../../node_modules/@prisma-clients/auth-db"
+}
+
+datasource db {
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+}
+
+
+model User {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    email String @unique
+    password String
+}

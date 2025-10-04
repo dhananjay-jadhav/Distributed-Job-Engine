@@ -1,15 +1,18 @@
 {
-  "name": "@distributed-job-engine-with-g-rpc/source",
+  "name": "@jobber/source",
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "nx serve"
+    "build": "nx serve",
+    "start": "nx serve",
+    "auth-migrate": "nx migrate-prisma auth-db"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@prisma/client": "^6.16.3",
     "axios": "^1.6.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0"
@@ -39,6 +42,7 @@
     "jest-util": "^30.0.2",
     "nx": "21.5.3",
     "prettier": "^2.6.2",
+    "prisma": "^6.16.3",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",

@@ -14,7 +14,6 @@
     ],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
-  "nxCloudId": "68d2e8196199b629bc6e336a",
   "plugins": [
     {
       "plugin": "@nx/webpack/plugin",
