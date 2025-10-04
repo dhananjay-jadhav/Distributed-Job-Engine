@@ -1,1 +1,1 @@
-yarn lint-stages --relative
+yarn lint-staged --relative
