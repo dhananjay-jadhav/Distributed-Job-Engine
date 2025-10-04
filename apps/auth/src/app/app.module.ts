@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthDbModule } from '@jobber/auth-db';
 import { GraphQLModule } from '@nestjs/graphql';
 import {
@@ -22,12 +20,12 @@ import { UsersApiModule } from '@jobber/users-api';
       },
       sortSchema: true,
       playground: false,
-      
+
       plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
     }),
-    UsersApiModule
+    UsersApiModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

@@ -6,7 +6,11 @@
   "scripts": {
     "build": "nx serve",
     "start": "nx serve",
-    "auth-migrate": "nx migrate-prisma auth-db"
+    "lint": "nx lint",
+    "test": "nx test",
+    "format": "nx format:write",
+    "auth-migrate": "nx migrate-prisma auth-db",
+    "prepare": "husky"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -19,6 +23,7 @@
     "@nestjs/platform-express": "^11.0.0",
     "@prisma/client": "^6.16.3",
     "axios": "^1.6.0",
+    "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "graphql": "^16.11.0",
@@ -41,13 +46,16 @@
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/bcrypt": "^6.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "20.19.9",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
     "jest-environment-node": "^30.0.2",
     "jest-util": "^30.0.2",
+    "lint-staged": "^16.2.3",
     "nx": "21.5.3",
     "prettier": "^2.6.2",
     "prisma": "^6.16.3",
