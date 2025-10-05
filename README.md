@@ -1,86 +1,121 @@
-# Distributed-Job-Engine-with-gRPC
-Distributed Job Engine with gRPC, Pulsar, Kubernetes &amp; AWS
+# Distributed Job Engine
 
+A modern distributed job processing engine built with gRPC, Apache Pulsar, Kubernetes, and AWS. This project implements a scalable and robust system for distributed job execution and management.
 
-# DistributedJobEngineWithGRPC
+## 🚀 Features
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+- **Microservices Architecture**: Built using NestJS for scalable microservices
+- **Authentication System**: JWT-based authentication with GraphQL Federation
+- **Distributed Job Processing**: Powered by Apache Pulsar
+- **Cloud-Native**: Kubernetes deployment ready
+- **GraphQL API**: Apollo Federation for API gateway
+- **Modern Stack**: TypeScript, NestJS, GraphQL, gRPC
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## 🛠️ Technologies
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Backend Framework**: NestJS
+- **API**: GraphQL with Apollo Federation
+- **Authentication**: JWT
+- **Message Queue**: Apache Pulsar
+- **Container Orchestration**: Kubernetes
+- **Cloud Provider**: AWS
+- **Language**: TypeScript
+- **Communication**: gRPC
 
-## Finish your CI setup
+## 📋 Prerequisites
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/OICtuN6IAm)
+- Node.js (v16 or later)
+- Yarn package manager
+- Docker
+- Kubernetes cluster
+- Apache Pulsar
+- AWS Account (for cloud deployment)
 
+## 🔧 Installation
 
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
-npx nx serve auth
+1. Clone the repository:
+```bash
+git clone https://github.com/dhananjay-jadhav/Distributed-Job-Engine.git
+cd Distributed-Job-Engine
 ```
 
-To create a production bundle:
-
-```sh
-npx nx build auth
+2. Install dependencies:
+```bash
+yarn install
 ```
 
-To see all available targets to run for a project, run:
+3. Set up environment variables:
+```bash
+# Copy example environment file
+cp .env.example .env
 
-```sh
-npx nx show project auth
+# Configure the following variables
+AUTH_JWT_SECRET=your_jwt_secret
+AUTH_JWT_EXPIRES_IN=1h
+USER_PORT=3000
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🚀 Running the Application
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/nest:app demo
+1. Start the authentication service:
+```bash
+yarn nx serve auth
 ```
 
-To generate a new library, use:
-
-```sh
-npx nx g @nx/node:lib mylib
+2. Build for production:
+```bash
+yarn nx build auth
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+3. Run tests:
+```bash
+yarn nx test auth
+```
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🏗️ Project Structure
 
+```
+.
+├── apps/
+│   ├── auth/                 # Authentication service
+│   └── auth-e2e/            # E2E tests
+├── libs/
+│   ├── auth-api/            # Authentication API
+│   ├── auth-db/             # Database module
+│   ├── users/               # Users module
+│   └── users-api/           # Users API
+└── README.md
+```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 📖 API Documentation
 
-## Install Nx Console
+The API is built using GraphQL and can be accessed at:
+```
+http://localhost:3000/api/graphql
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+Key endpoints:
+- `createUser`: Create a new user
+- `user`: Get user by ID
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🤝 Contributing
 
-## Useful links
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Learn more:
+## 📄 License
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 👥 Authors
+
+- **Dhananjay Jadhav** - 
+
+## 🌟 Acknowledgments
+
+- NestJS Team for the excellent framework
+- Apollo GraphQL for Federation support
+- Apache Pulsar community
