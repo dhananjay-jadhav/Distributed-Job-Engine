@@ -7,9 +7,9 @@
     "build": "nx serve",
     "start": "nx serve",
     "lint": "nx lint",
-    "lint:all": "nx run-many --target=lint --all --parallel",
+    "all:lint": "nx run-many --target=lint --all --parallel",
     "test": "nx test",
-    "test:all": "nx run-many --target=test --all --parallel",
+    "all:test": "nx run-many --target=test --all --parallel",
     "format": "nx format:write",
     "auth-migrate": "nx migrate-prisma auth-db",
     "prepare": "husky"
