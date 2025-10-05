@@ -31,6 +31,8 @@ jobs:
           node-version: 24
           cache: 'yarn'
 
+      - run: cp .env.example .env
+
       - run: yarn install --immutable
 
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
