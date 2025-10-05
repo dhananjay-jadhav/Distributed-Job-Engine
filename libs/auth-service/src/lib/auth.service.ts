@@ -31,7 +31,7 @@ export class AuthService {
     res.cookie('Authentication', accesstoken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'lax', // or 'strict'
+      // sameSite: 'lax', // or 'strict'
       expires,
     });
     return {
@@ -44,9 +44,9 @@ export class AuthService {
     try {
       const user = await this.userService.getUser({
         email,
-        password,
       });
       const authenticated = await compare(password, user.password);
+
       if (!authenticated) {
         throw new UnauthorizedException();
       }

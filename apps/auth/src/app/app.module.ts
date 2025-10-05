@@ -8,8 +8,7 @@ import {
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
 import { UsersApiModule } from '@jobber/users-api';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 import { AuthApiModule } from '@jobber/auth-api';
 
 @Module({
@@ -19,16 +18,6 @@ import { AuthApiModule } from '@jobber/auth-api';
       cache: true,
     }),
     AuthDbModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.getOrThrow('AUTH_JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.getOrThrow('AUTH_JWT_EXPIRES_IN'),
-        },
-      }),
-      inject: [ConfigService],
-    }),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       autoSchemaFile: {
