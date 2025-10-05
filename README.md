@@ -34,20 +34,23 @@ A modern distributed job processing engine built with gRPC, Apache Pulsar, Kuber
 ## 🔧 Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/dhananjay-jadhav/Distributed-Job-Engine.git
 cd Distributed-Job-Engine
 ```
 
 2. Install dependencies:
+
 ```bash
 yarn install
 ```
 
 3. Set up environment variables:
+
 ```bash
 # Copy example environment file
-cp .env.example .env
+cp .env.sample .env
 
 # Configure the following variables
 AUTH_JWT_SECRET=your_jwt_secret
@@ -58,16 +61,19 @@ USER_PORT=3000
 ## 🚀 Running the Application
 
 1. Start the authentication service:
+
 ```bash
 yarn nx serve auth
 ```
 
 2. Build for production:
+
 ```bash
 yarn nx build auth
 ```
 
 3. Run tests:
+
 ```bash
 yarn nx test auth
 ```
@@ -90,11 +96,13 @@ yarn nx test auth
 ## 📖 API Documentation
 
 The API is built using GraphQL and can be accessed at:
+
 ```
 http://localhost:3000/api/graphql
 ```
 
 Key endpoints:
+
 - `createUser`: Create a new user
 - `user`: Get user by ID
 
@@ -112,7 +120,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Dhananjay Jadhav** - 
+- **Dhananjay Jadhav** -
 
 ## 🌟 Acknowledgments
 

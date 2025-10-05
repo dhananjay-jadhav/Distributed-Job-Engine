@@ -31,7 +31,7 @@ jobs:
           node-version: 24
           cache: 'yarn'
 
-      - run: cp .env.example .env
+      - run: cp .env.sample .env
 
       - run: yarn install --immutable
 
