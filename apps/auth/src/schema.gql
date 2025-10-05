@@ -7,8 +7,14 @@ input CreateUserInput {
   password: String!
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
+  login(loginInput: LoginInput!): User!
 }
 
 type Query {

@@ -23,4 +23,12 @@ export class UserService {
       },
     });
   }
+
+  async getUser(userInput: Prisma.UserWhereUniqueInput) {
+    return this.authDbService.user.findUniqueOrThrow({
+      where: {
+        ...userInput,
+      },
+    });
+  }
 }
