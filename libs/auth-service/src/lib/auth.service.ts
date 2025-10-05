@@ -20,7 +20,7 @@ export class AuthService {
     const expires = new Date();
     expires.setMilliseconds(
       expires.getTime() +
-        parseInt(this.configService.getOrThrow('AUTH_JWT_EXPIRES_IN')) * 1000
+        parseInt(this.configService.getOrThrow('AUTH_JWT_EXPIRES_IN'))
     );
     const payload: LoginPayload = {
       userId: user.id,
@@ -46,6 +46,10 @@ export class AuthService {
         email,
       });
       const authenticated = await compare(password, user.password);
+
+      console.log('user', user);
+
+      console.log('authenticated', authenticated);
 
       if (!authenticated) {
         throw new UnauthorizedException();
