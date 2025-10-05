@@ -1,8 +1,8 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
-import { UserType, CreateUserInput } from '@jobber/common-utils';
+import { UserType, CreateUserInput, LoginPayload } from '@jobber/common-utils';
 import { UserService } from '@jobber/users';
 import { UseGuards } from '@nestjs/common';
-import { GQLAuthGuard } from '@jobber/auth-service';
+import { CurrentUser, GQLAuthGuard } from '@jobber/auth-service';
 
 @Resolver(UserType)
 export class UsersResolver {
@@ -18,7 +18,10 @@ export class UsersResolver {
 
   @UseGuards(GQLAuthGuard)
   @Query(() => UserType, { name: 'user' })
-  async getUser(@Args('userId') userId: string): Promise<UserType | null> {
+  async getUser(
+    @Args('userId') userId: string,
+    @CurrentUser() _currentUser: LoginPayload
+  ): Promise<UserType | null> {
     return this.userService.getUserbyId(userId);
   }
 }
