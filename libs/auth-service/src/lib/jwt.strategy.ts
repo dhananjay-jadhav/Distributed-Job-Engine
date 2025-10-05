@@ -14,18 +14,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => {
-          const authtoken = req.cookies.Authentication;
-          console.log('authtoken', authtoken);
-          return authtoken;
-        },
+        (req: Request) => req.cookies.Authentication,
       ]),
       secretOrKey: configService.getOrThrow('AUTH_JWT_SECRET'),
     });
   }
 
   async validate(payload: LoginPayload): Promise<LoginPayload> {
-    console.log('in validate');
     const validateUser = await this.userService.getUserbyId(payload.userId);
     if (validateUser?.email) {
       return payload;
