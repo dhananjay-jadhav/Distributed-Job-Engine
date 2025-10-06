@@ -21,6 +21,7 @@
       "@jobber/auth-db": ["libs/auth-db/src/index.ts"],
       "@jobber/auth-service": ["libs/auth-service/src/index.ts"],
       "@jobber/common-utils": ["libs/common-utils/src/index.ts"],
+      "@jobber/jobs-service": ["libs/jobs-service/src/index.ts"],
       "@jobber/users": ["libs/users/src/index.ts"],
       "@jobber/users-api": ["libs/users-api/src/index.ts"]
     }
