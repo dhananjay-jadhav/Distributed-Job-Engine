@@ -4,3 +4,5 @@ export * from './login.input';
 export * from './login.payload';
 export * from './abstract.model';
 export * from './gql-context';
+export * from './jobs.type';
+export * from './jobs-filters.input';

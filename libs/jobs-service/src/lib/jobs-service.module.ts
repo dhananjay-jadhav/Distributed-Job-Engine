@@ -6,6 +6,6 @@ import { DiscoveryModule } from '@golevelup/nestjs-discovery';
 @Module({
   imports: [DiscoveryModule],
   providers: [FibonacciJob, JobsService],
-  exports: [],
+  exports: [JobsService],
 })
 export class JobsServiceModule {}
