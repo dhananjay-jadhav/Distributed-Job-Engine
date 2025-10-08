@@ -1654,7 +1654,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:^2.5.0":
+"@bufbuild/protobuf@npm:^2.0.0, @bufbuild/protobuf@npm:^2.5.0":
   version: 2.9.0
   resolution: "@bufbuild/protobuf@npm:2.9.0"
   checksum: 10c0/fe46723c12204c00ff1f4eefb3636a7e7ad9e3c87736ed92e9de77aad6f29edae9b903a1517bb0cd8d1b24da46934ab1ae7acebc04c151b8f3a6151b7583f20f
@@ -1849,6 +1849,30 @@ __metadata:
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 10c0/94e9d75c1f178bbae8d874f5a9361708a3350c8def7eaeb6920f2c820e82403b7d4f55b3735856d68e145e86c85cbfe2adc444fdc25519cd51f108697e99346c
+  languageName: node
+  linkType: hard
+
+"@grpc/grpc-js@npm:^1.14.0":
+  version: 1.14.0
+  resolution: "@grpc/grpc-js@npm:1.14.0"
+  dependencies:
+    "@grpc/proto-loader": "npm:^0.8.0"
+    "@js-sdsl/ordered-map": "npm:^4.4.2"
+  checksum: 10c0/51e0eb32f6dac68c49502b227e565c4244f53983d2efab8ef3fd2cc923999751c059f6c77fec4941a93c44eaa58cbc321ce1e9868e1ec226fba5a6c93722c3b1
+  languageName: node
+  linkType: hard
+
+"@grpc/proto-loader@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "@grpc/proto-loader@npm:0.8.0"
+  dependencies:
+    lodash.camelcase: "npm:^4.3.0"
+    long: "npm:^5.0.0"
+    protobufjs: "npm:^7.5.3"
+    yargs: "npm:^17.7.2"
+  bin:
+    proto-loader-gen-types: build/bin/proto-loader-gen-types.js
+  checksum: 10c0/a27da3b85d5d17bab956d536786c717287eae46ca264ea9ec774db90ff571955bae2705809f431b4622fbf3be9951d7c7bbb1360b2015ee88abe1587cf3d6fe0
   languageName: node
   linkType: hard
 
@@ -2224,12 +2248,15 @@ __metadata:
     "@as-integrations/express5": "npm:^1.1.2"
     "@eslint/js": "npm:^9.8.0"
     "@golevelup/nestjs-discovery": "npm:^5.0.0"
+    "@grpc/grpc-js": "npm:^1.14.0"
+    "@grpc/proto-loader": "npm:^0.8.0"
     "@nestjs/apollo": "npm:^13.2.1"
     "@nestjs/common": "npm:^11.0.0"
     "@nestjs/config": "npm:^4.0.2"
     "@nestjs/core": "npm:^11.0.0"
     "@nestjs/graphql": "npm:^13.2.0"
     "@nestjs/jwt": "npm:^11.0.0"
+    "@nestjs/microservices": "npm:^11.1.6"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.0.0"
     "@nestjs/schematics": "npm:^11.0.0"
@@ -2270,10 +2297,12 @@ __metadata:
     passport-jwt: "npm:^4.0.1"
     prettier: "npm:^2.6.2"
     prisma: "npm:^6.16.3"
+    protoc: "npm:^32.1.0"
     reflect-metadata: "npm:^0.1.13"
     rxjs: "npm:^7.8.0"
     ts-jest: "npm:^29.4.0"
     ts-node: "npm:10.9.1"
+    ts-proto: "npm:^2.7.7"
     tslib: "npm:^2.3.0"
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.40.0"
@@ -2342,6 +2371,13 @@ __metadata:
     "@jridgewell/resolve-uri": "npm:^3.1.0"
     "@jridgewell/sourcemap-codec": "npm:^1.4.14"
   checksum: 10c0/4b30ec8cd56c5fd9a661f088230af01e0c1a3888d11ffb6b47639700f71225be21d1f7e168048d6d4f9449207b978a235c07c8f15c07705685d16dc06280e9d9
+  languageName: node
+  linkType: hard
+
+"@js-sdsl/ordered-map@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "@js-sdsl/ordered-map@npm:4.4.2"
+  checksum: 10c0/cc7e15dc4acf6d9ef663757279600bab70533d847dcc1ab01332e9e680bd30b77cdf9ad885cc774276f51d98b05a013571c940e5b360985af5eb798dc1a2ee2b
   languageName: node
   linkType: hard
 
@@ -2609,6 +2645,49 @@ __metadata:
     class-validator:
       optional: true
   checksum: 10c0/cd9f9236648d8a146a4e6890009415400cca7959c3976acdf6fec2ddddc73546d174e58f935b96c6b2319dc54c76e58a39bf47f41991bcd27d1cb55bca99474e
+  languageName: node
+  linkType: hard
+
+"@nestjs/microservices@npm:^11.1.6":
+  version: 11.1.6
+  resolution: "@nestjs/microservices@npm:11.1.6"
+  dependencies:
+    iterare: "npm:1.2.1"
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    "@grpc/grpc-js": "*"
+    "@nestjs/common": ^11.0.0
+    "@nestjs/core": ^11.0.0
+    "@nestjs/websockets": ^11.0.0
+    amqp-connection-manager: "*"
+    amqplib: "*"
+    cache-manager: "*"
+    ioredis: "*"
+    kafkajs: "*"
+    mqtt: "*"
+    nats: "*"
+    reflect-metadata: ^0.1.12 || ^0.2.0
+    rxjs: ^7.1.0
+  peerDependenciesMeta:
+    "@grpc/grpc-js":
+      optional: true
+    "@nestjs/websockets":
+      optional: true
+    amqp-connection-manager:
+      optional: true
+    amqplib:
+      optional: true
+    cache-manager:
+      optional: true
+    ioredis:
+      optional: true
+    kafkajs:
+      optional: true
+    mqtt:
+      optional: true
+    nats:
+      optional: true
+  checksum: 10c0/c7405467083ef491d207849b59ea339e090d98599f923ac2a22d1987775c254afdccc7cb182292af2d03110b00af27a70a8c14b28b3024b07aae9386bf5b9114
   languageName: node
   linkType: hard
 
@@ -3941,6 +4020,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/c6738131f1698258a5ac1e0185e4fc56977f7f566cd0ee11167f93f2339478470257bd82c5e1908a936a204e0ad7996d741356a1a07c04997a236161ea23a874
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:>=13.7.0":
+  version: 24.7.0
+  resolution: "@types/node@npm:24.7.0"
+  dependencies:
+    undici-types: "npm:~7.14.0"
+  checksum: 10c0/f036c78062cb3a0d5c6586bf2dac347ed3f4af121cef4ab92c85c44e32be1c50aab5ba96955842b7f8165f0e0f1c8066d1813ae259372df6c0fa9fadb1116a3e
   languageName: node
   linkType: hard
 
@@ -5486,6 +5574,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"case-anything@npm:^2.1.13":
+  version: 2.1.13
+  resolution: "case-anything@npm:2.1.13"
+  checksum: 10c0/b02ffa51d7d58b9a32df7b40973836e16afad131eae7d343e64cb3ca7be57a936bf3d6c9d57a7aa242cf2f545d9a33990b755e93bcac2517761d77773a4a6a30
+  languageName: node
+  linkType: hard
+
 "chalk@npm:^4.0.0, chalk@npm:^4.1.0, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -6496,6 +6591,15 @@ __metadata:
   version: 16.6.1
   resolution: "dotenv@npm:16.6.1"
   checksum: 10c0/15ce56608326ea0d1d9414a5c8ee6dcf0fffc79d2c16422b4ac2268e7e2d76ff5a572d37ffe747c377de12005f14b3cc22361e79fc7f1061cce81f77d2c973dc
+  languageName: node
+  linkType: hard
+
+"dprint-node@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "dprint-node@npm:1.0.8"
+  dependencies:
+    detect-libc: "npm:^1.0.3"
+  checksum: 10c0/39c1f8511833226cde773129afc5862dfd05babe062375e6b1f5824e221a5743a4d9c48626f32f7c2080113566270fe80521a50acb9029a20a2e80a3cd5e4106
   languageName: node
   linkType: hard
 
@@ -9473,6 +9577,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.camelcase@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "lodash.camelcase@npm:4.3.0"
+  checksum: 10c0/fcba15d21a458076dd309fce6b1b4bf611d84a0ec252cb92447c948c533ac250b95d2e00955801ebc367e5af5ed288b996d75d37d2035260a937008e14eaf432
+  languageName: node
+  linkType: hard
+
 "lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
@@ -9605,6 +9716,13 @@ __metadata:
   version: 4.0.0
   resolution: "long@npm:4.0.0"
   checksum: 10c0/50a6417d15b06104dbe4e3d4a667c39b137f130a9108ea8752b352a4cfae047531a3ac351c181792f3f8768fe17cca6b0f406674a541a86fb638aaac560d83ed
+  languageName: node
+  linkType: hard
+
+"long@npm:^5.0.0":
+  version: 5.3.2
+  resolution: "long@npm:5.3.2"
+  checksum: 10c0/7130fe1cbce2dca06734b35b70d380ca3f70271c7f8852c922a7c62c86c4e35f0c39290565eca7133c625908d40e126ac57c02b1b1a4636b9457d77e1e60b981
   languageName: node
   linkType: hard
 
@@ -11365,6 +11483,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"protobufjs@npm:^7.5.3":
+  version: 7.5.4
+  resolution: "protobufjs@npm:7.5.4"
+  dependencies:
+    "@protobufjs/aspromise": "npm:^1.1.2"
+    "@protobufjs/base64": "npm:^1.1.2"
+    "@protobufjs/codegen": "npm:^2.0.4"
+    "@protobufjs/eventemitter": "npm:^1.1.0"
+    "@protobufjs/fetch": "npm:^1.1.0"
+    "@protobufjs/float": "npm:^1.0.2"
+    "@protobufjs/inquire": "npm:^1.1.0"
+    "@protobufjs/path": "npm:^1.1.2"
+    "@protobufjs/pool": "npm:^1.1.0"
+    "@protobufjs/utf8": "npm:^1.1.0"
+    "@types/node": "npm:>=13.7.0"
+    long: "npm:^5.0.0"
+  checksum: 10c0/913b676109ffb3c05d3d31e03a684e569be91f3bba8613da4a683d69d9dba948daa2afd7d2e7944d1aa6c417890c35d9d9a8883c1160affafb0f9670d59ef722
+  languageName: node
+  linkType: hard
+
+"protoc@npm:^32.1.0":
+  version: 32.1.0
+  resolution: "protoc@npm:32.1.0"
+  bin:
+    protoc: protoc.cjs
+  checksum: 10c0/90ab8a94b9c7565322dc119d1747f9c73bc8a9162cea6e960d90877eb8a42fbab61aeb64c7ba1a9edddbb75e6189a7b0e867106bb39441d6b5a4dee5eba29b7e
+  languageName: node
+  linkType: hard
+
 "proxy-addr@npm:^2.0.7, proxy-addr@npm:~2.0.7":
   version: 2.0.7
   resolution: "proxy-addr@npm:2.0.7"
@@ -13116,6 +13263,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-poet@npm:^6.12.0":
+  version: 6.12.0
+  resolution: "ts-poet@npm:6.12.0"
+  dependencies:
+    dprint-node: "npm:^1.0.8"
+  checksum: 10c0/605ac770055259b618ba657b88995f7851d8a6106d9c335e71c8442be51a9b8a87c501aa7ab4babb43700a32ff47dc1cd877f78892c15166ded87c311c878735
+  languageName: node
+  linkType: hard
+
+"ts-proto-descriptors@npm:2.0.0":
+  version: 2.0.0
+  resolution: "ts-proto-descriptors@npm:2.0.0"
+  dependencies:
+    "@bufbuild/protobuf": "npm:^2.0.0"
+  checksum: 10c0/a4f47a6db7de6b328a5b22bb0bed2a0dac929c28002567613db7980e0a8392b9148530e432a602a8c6b2cfda9909be9568a2e5c545f5624bb5d5eba52031c059
+  languageName: node
+  linkType: hard
+
+"ts-proto@npm:^2.7.7":
+  version: 2.7.7
+  resolution: "ts-proto@npm:2.7.7"
+  dependencies:
+    "@bufbuild/protobuf": "npm:^2.0.0"
+    case-anything: "npm:^2.1.13"
+    ts-poet: "npm:^6.12.0"
+    ts-proto-descriptors: "npm:2.0.0"
+  bin:
+    protoc-gen-ts_proto: protoc-gen-ts_proto
+  checksum: 10c0/fa0daf0b6d635ab87c950c4a1c79722d80cd3d3800e950a6dd36aad68cec4c39a2bb66b96f45c8fe0302672dbb571ffa5a6baa0a05702642e729a382efdc0dbc
+  languageName: node
+  linkType: hard
+
 "tsconfig-paths-webpack-plugin@npm:4.2.0":
   version: 4.2.0
   resolution: "tsconfig-paths-webpack-plugin@npm:4.2.0"
@@ -13293,6 +13472,13 @@ __metadata:
   version: 7.12.0
   resolution: "undici-types@npm:7.12.0"
   checksum: 10c0/326e455bbc0026db1d6b81c76a1cf10c63f7e2f9821db2e24fdc258f482814e5bfa8481f8910d07c68e305937c5c049610fdc441c5e8b7bb0daca7154fb8a306
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.14.0":
+  version: 7.14.0
+  resolution: "undici-types@npm:7.14.0"
+  checksum: 10c0/e7f3214b45d788f03c51ceb33817be99c65dae203863aa9386b3ccc47201a245a7955fc721fb581da9c888b6ebad59fa3f53405214afec04c455a479908f0f14
   languageName: node
   linkType: hard
 

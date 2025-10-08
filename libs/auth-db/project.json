@@ -7,12 +7,12 @@
   "// targets": "to see all targets run: nx show project auth-db --web",
   "targets": {
     "build": {
-      "dependsOn": ["gen-types"]
+      "dependsOn": ["gen-prisma-types"]
     },
     "test": {
-      "dependsOn": ["gen-types"]
+      "dependsOn": ["gen-prisma-types"]
     },
-    "gen-types": {
+    "gen-prisma-types": {
       "command": "prisma generate",
       "options": {
         "cwd": "libs/auth-db/src/lib"
