@@ -47,10 +47,6 @@ export class AuthService {
       });
       const authenticated = await compare(password, user.password);
 
-      console.log('user', user);
-
-      console.log('authenticated', authenticated);
-
       if (!authenticated) {
         throw new UnauthorizedException();
       }

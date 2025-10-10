@@ -1,12 +1,14 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { JobsService } from '@jobber/jobs-service';
-import { JobsFilter, JobType } from '@jobber/common-utils';
+import { GqlAuthGuardService, JobsFilter, JobType } from '@jobber/common-utils';
+import { UseGuards } from '@nestjs/common';
 
 @Resolver(() => JobType)
 export class JobsResolver {
   constructor(private readonly jobsService: JobsService) {}
 
   @Query(() => [JobType], { name: 'jobs' })
+  @UseGuards(GqlAuthGuardService)
   jobs(
     @Args('jobsFilter', { nullable: true }) jobsFilter?: JobsFilter
   ): JobType[] {

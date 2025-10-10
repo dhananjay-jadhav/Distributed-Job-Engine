@@ -54,7 +54,7 @@ cp .env.sample .env
 
 # Configure the following variables
 AUTH_JWT_SECRET=your_jwt_secret
-AUTH_JWT_EXPIRES_IN=1h
+AUTH_JWT_EXPIRES_IN=300
 USER_PORT=3000
 ```
 

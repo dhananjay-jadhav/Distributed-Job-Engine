@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JobsServiceModule } from '@jobber/jobs-service';
-import { JobsResolver } from './jobs.resolver';
+import { JobsApiModule } from '@jobber/jobs-api';
 import { GraphQLModule } from '@nestjs/graphql';
 import {
   ApolloFederationDriver,
@@ -9,6 +9,7 @@ import {
 } from '@nestjs/apollo';
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       isGlobal: true,
       cache: true,
     }),
+    LoggerModule.forRoot(),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       autoSchemaFile: {
@@ -28,8 +30,9 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
     }),
     JobsServiceModule,
+    JobsApiModule,
   ],
   controllers: [],
-  providers: [JobsResolver],
+  providers: [],
 })
 export class AppModule {}

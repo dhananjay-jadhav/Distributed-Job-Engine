@@ -10,6 +10,7 @@ import { join } from 'path';
 import { UsersApiModule } from '@jobber/users-api';
 import { ConfigModule } from '@nestjs/config';
 import { AuthApiModule } from '@jobber/auth-api';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthApiModule } from '@jobber/auth-api';
       isGlobal: true,
       cache: true,
     }),
+    LoggerModule.forRoot(),
     AuthDbModule,
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
