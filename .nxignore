@@ -1,2 +1,3 @@
 apps/auth/src/schema.gql
 apps/jobs/src/schema.gql
+libs/proto/src/types
