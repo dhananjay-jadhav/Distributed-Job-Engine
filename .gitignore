@@ -46,3 +46,5 @@ Thumbs.db
 .env
 
 .yarn/install-state.gz
+
+newrelic_agent.log

@@ -11,6 +11,8 @@ import { UsersApiModule } from '@jobber/users-api';
 import { ConfigModule } from '@nestjs/config';
 import { AuthApiModule } from '@jobber/auth-api';
 import { LoggerModule } from 'nestjs-pino';
+import createPlugin = require('@newrelic/apollo-server-plugin');
+import { ApolloServerPlugin } from '@apollo/server';
 
 @Module({
   imports: [
@@ -29,7 +31,10 @@ import { LoggerModule } from 'nestjs-pino';
       sortSchema: true,
       playground: false,
       context: ({ req, res }) => ({ req, res }),
-      plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+        createPlugin<ApolloServerPlugin>({}),
+      ],
     }),
     UsersApiModule,
     AuthApiModule,

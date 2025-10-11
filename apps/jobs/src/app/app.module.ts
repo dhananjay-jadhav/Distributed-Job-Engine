@@ -9,7 +9,9 @@ import {
 } from '@nestjs/apollo';
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import createPlugin = require('@newrelic/apollo-server-plugin');
 import { LoggerModule } from 'nestjs-pino';
+import { ApolloServerPlugin } from '@apollo/server';
 
 @Module({
   imports: [
@@ -27,7 +29,10 @@ import { LoggerModule } from 'nestjs-pino';
       sortSchema: true,
       playground: false,
       context: ({ req, res }) => ({ req, res }),
-      plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+        createPlugin<ApolloServerPlugin>({}),
+      ],
     }),
     JobsServiceModule,
     JobsApiModule,
