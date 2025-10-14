@@ -25,6 +25,7 @@ import { HealthModule } from './health/health.module';
     AuthDbModule,
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
+      path: 'api/graphql',
       autoSchemaFile: {
         path: join(process.cwd(), 'apps/auth/src/schema.gql'),
         federation: 2,

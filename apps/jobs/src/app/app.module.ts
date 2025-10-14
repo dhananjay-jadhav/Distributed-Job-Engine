@@ -23,6 +23,7 @@ import { HealthModule } from './health/health.module';
     LoggerModule.forRoot(),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
+      path: 'api/graphql',
       autoSchemaFile: {
         path: join(process.cwd(), 'apps/jobs/src/schema.gql'),
         federation: 2,
