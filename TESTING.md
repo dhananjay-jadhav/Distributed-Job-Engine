@@ -104,6 +104,38 @@ docker compose down
 
 The GitHub Actions workflow uses a parallelized architecture for faster CI execution:
 
+### Advanced Caching Strategy
+
+The workflow implements a multi-layered caching strategy for optimal performance:
+
+#### 1. **Node Modules Cache**
+- **Key**: `${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}`
+- **Restore keys**: `${{ runner.os }}-workspace-` (falls back to any previous workspace cache)
+- **When**: Cache is invalidated only when `yarn.lock` changes
+- **Benefit**: Avoids re-downloading dependencies on every push
+
+#### 2. **Nx Computation Cache**
+- **Key**: `${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}`
+- **Restore keys**: Progressively falls back to previous Nx configurations
+- **When**: Cached per commit, restores from previous commits if available
+- **Benefit**: Nx can skip rebuilding/retesting unchanged projects
+
+#### 3. **Build Output Cache**
+- **Key**: `${{ runner.os }}-build-${{ matrix.project }}-${{ github.sha }}`
+- **When**: Build outputs cached per project per commit
+- **Benefit**: E2E tests can restore built artifacts instead of rebuilding
+
+#### 4. **Yarn Cache**
+- **Managed by**: `actions/setup-node@v4` with `cache: 'yarn'`
+- **Benefit**: Speeds up yarn install even on cache miss
+
+### Cache Lifecycle
+
+- **Creation**: Setup job creates all caches after installation
+- **Restoration**: All dependent jobs use `cache/restore` with `fail-on-cache-miss`
+- **Automatic cleanup**: GitHub automatically removes caches older than 7 days or when storage exceeds 10GB
+- **Cache invalidation**: Caches update when dependencies or configuration files change
+
 ### Dynamic Project Discovery
 
 The workflow automatically discovers projects from your Nx workspace:
@@ -113,21 +145,21 @@ The workflow automatically discovers projects from your Nx workspace:
 
 ### Parallel Jobs
 
-1. **Setup Job**: Installs dependencies, caches workspace, and discovers all projects
-2. **Lint Jobs**: Runs linting for all projects with lint target in parallel
-3. **Test Jobs**: Runs tests for testable projects in parallel with isolated databases
-4. **Build Jobs**: Builds all buildable projects in parallel
-5. **E2E Jobs**: Runs E2E tests for auth and jobs services in parallel
+1. **Setup Job**: Installs dependencies, caches workspace, discovers projects, and creates Nx cache
+2. **Lint Jobs**: Runs linting for all projects with lint target in parallel (uses cached dependencies and Nx cache)
+3. **Test Jobs**: Runs tests for testable projects in parallel with isolated databases (uses cached dependencies and Nx cache)
+4. **Build Jobs**: Builds all buildable projects in parallel (uses cached dependencies and Nx cache, creates build output cache)
+5. **E2E Jobs**: Runs E2E tests for auth and jobs services in parallel (uses all caches including build outputs)
 
 ### Workflow Structure
 
 ```
-setup (install, cache, discover projects)
-  ├── lint (dynamic parallel jobs based on discovered projects)
-  ├── test (dynamic parallel jobs with database, excluding E2E and apps)
-  └── build (dynamic parallel jobs for buildable projects)
-      ├── e2e-auth (starts auth service, runs E2E tests)
-      └── e2e-jobs (starts auth + jobs services, runs E2E tests)
+setup (install, cache dependencies, cache Nx, discover projects)
+  ├── lint (restore caches, parallel jobs based on discovered projects)
+  ├── test (restore caches, parallel jobs with database, excluding E2E and apps)
+  └── build (restore caches, parallel jobs, cache build outputs)
+      ├── e2e-auth (restore all caches, starts auth service, runs E2E tests)
+      └── e2e-jobs (restore all caches, starts auth + jobs services, runs E2E tests)
 ```
 
 ### Reusable Components
@@ -136,30 +168,35 @@ setup (install, cache, discover projects)
   - Starts docker-compose services
   - Waits for PostgreSQL
   - Sets up Node.js and caching
+  - Restores node_modules and Nx caches
   - Runs database migrations
 
 ### Benefits
 
 - **Zero maintenance**: New projects are automatically included when you add them
-- **Faster CI**: Parallel execution reduces total CI time
+- **Faster CI**: Parallel execution + aggressive caching reduces total CI time significantly
+- **Efficient caching**: Multi-layered approach means rebuilds only happen when necessary
 - **Better isolation**: Each job runs independently with its own environment
 - **Clearer feedback**: Individual job status for each project
 - **Resource efficiency**: Only E2E jobs start application servers
 - **DRY principle**: Reusable action eliminates duplicate code in E2E jobs
 - **Future-proof**: Uses `docker-compose` - new services automatically available
+- **Automatic cleanup**: GitHub manages cache lifecycle automatically
 
 ### E2E Testing in CI
 
 Each E2E job:
-1. Uses shared E2E setup action for common steps
-2. Builds the application(s)
-3. Starts the application server(s) in background
-4. Waits for server to be ready (health check)
-5. Runs E2E tests against the running server
-6. Cleans up services and processes
+1. Uses shared E2E setup action for common steps (with cache restoration)
+2. Restores build outputs from build job cache
+3. Builds the application(s) (or uses cached build if unchanged)
+4. Starts the application server(s) in background
+5. Waits for server to be ready (health check)
+6. Runs E2E tests against the running server
+7. Cleans up services and processes
 
 This approach ensures that:
 - E2E jobs share common setup code via composite action
+- Build artifacts are reused when possible (via cache)
 - Any new services added to `docker-compose.yaml` are automatically available in CI
 - No duplication between local and CI environments
 - CI environment matches local development exactly

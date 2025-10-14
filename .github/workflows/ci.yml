@@ -18,6 +18,7 @@ jobs:
       lint-projects: ${{ steps.get-projects.outputs.lint }}
       test-projects: ${{ steps.get-projects.outputs.test }}
       build-projects: ${{ steps.get-projects.outputs.build }}
+      cache-key: ${{ steps.cache-keys.outputs.workspace }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,9 +30,40 @@ jobs:
           node-version: 24
           cache: 'yarn'
 
+      - name: Generate cache keys
+        id: cache-keys
+        run: |
+          echo "workspace=${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}" >> $GITHUB_OUTPUT
+          echo "nx=${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}" >> $GITHUB_OUTPUT
+
       - run: cp .env.sample .env
 
-      - run: yarn install --immutable
+      # Restore node_modules cache
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ steps.cache-keys.outputs.workspace }}
+          restore-keys: |
+            ${{ runner.os }}-workspace-
+
+      # Install only if cache miss
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      # Cache Nx computation cache
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: ${{ steps.cache-keys.outputs.nx }}-${{ github.sha }}
+          restore-keys: |
+            ${{ steps.cache-keys.outputs.nx }}-
+            ${{ runner.os }}-nx-
 
       - name: Get project lists
         id: get-projects
@@ -39,14 +71,6 @@ jobs:
           echo "lint=$(yarn nx show projects --with-target=lint 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
           echo "test=$(yarn nx show projects --with-target=test 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
           echo "build=$(yarn nx show projects --with-target=build 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-
-      - name: Cache workspace
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            .yarn
-          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
 
   # Lint all projects in parallel
   lint:
@@ -63,13 +87,23 @@ jobs:
           node-version: 24
           cache: 'yarn'
 
-      - name: Restore workspace
-        uses: actions/cache@v4
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
-            .yarn
-          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+            .yarn/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore Nx cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+            ${{ runner.os }}-nx-
 
       - run: cp .env.sample .env
 
@@ -105,13 +139,23 @@ jobs:
           node-version: 24
           cache: 'yarn'
 
-      - name: Restore workspace
-        uses: actions/cache@v4
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
-            .yarn
-          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+            .yarn/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore Nx cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+            ${{ runner.os }}-nx-
 
       - run: cp .env.sample .env
 
@@ -151,13 +195,32 @@ jobs:
           node-version: 24
           cache: 'yarn'
 
-      - name: Restore workspace
-        uses: actions/cache@v4
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
-            .yarn
-          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+            .yarn/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore Nx cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+            ${{ runner.os }}-nx-
+
+      # Cache build outputs
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            apps/*/dist
+          key: ${{ runner.os }}-build-${{ matrix.project }}-${{ github.sha }}
 
       - run: cp .env.sample .env
 
@@ -177,12 +240,22 @@ jobs:
 
   # E2E test for auth service
   e2e-auth:
-    needs: [lint, test, build]
+    needs: [lint, test, build, setup]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/e2e-setup
+        with:
+          cache-key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Restore build outputs
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            dist
+            apps/*/dist
+          key: ${{ runner.os }}-build-auth-${{ github.sha }}
 
       - name: Build auth service
         run: yarn nx build auth
@@ -219,12 +292,22 @@ jobs:
 
   # E2E test for jobs service
   e2e-jobs:
-    needs: [lint, test, build]
+    needs: [lint, test, build, setup]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/e2e-setup
+        with:
+          cache-key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Restore build outputs
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            dist
+            apps/*/dist
+          key: ${{ runner.os }}-build-jobs-${{ github.sha }}
 
       - name: Build auth and jobs services
         run: |

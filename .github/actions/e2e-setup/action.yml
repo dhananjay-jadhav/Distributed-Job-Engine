@@ -1,6 +1,11 @@
 name: 'E2E Test Setup'
 description: 'Sets up environment for E2E testing with database and dependencies'
 
+inputs:
+  cache-key:
+    description: 'Cache key for node_modules'
+    required: true
+
 runs:
   using: 'composite'
   steps:
@@ -18,13 +23,23 @@ runs:
         node-version: 24
         cache: 'yarn'
 
-    - name: Restore workspace
-      uses: actions/cache@v4
+    - name: Restore node_modules
+      uses: actions/cache/restore@v4
       with:
         path: |
           node_modules
-          .yarn
-        key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+          .yarn/cache
+        key: ${{ inputs.cache-key }}
+        fail-on-cache-miss: true
+
+    - name: Restore Nx cache
+      uses: actions/cache/restore@v4
+      with:
+        path: .nx/cache
+        key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+          ${{ runner.os }}-nx-
 
     - name: Copy environment file
       shell: bash
