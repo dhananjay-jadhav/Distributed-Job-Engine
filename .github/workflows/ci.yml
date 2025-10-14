@@ -14,6 +14,10 @@ jobs:
   # Setup and shared dependencies
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      lint-projects: ${{ steps.get-projects.outputs.lint }}
+      test-projects: ${{ steps.get-projects.outputs.test }}
+      build-projects: ${{ steps.get-projects.outputs.build }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +33,13 @@ jobs:
 
       - run: yarn install --immutable
 
+      - name: Get project lists
+        id: get-projects
+        run: |
+          echo "lint=$(yarn nx show projects --with-target=lint 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "test=$(yarn nx show projects --with-target=test 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "build=$(yarn nx show projects --with-target=build 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+
       - name: Cache workspace
         uses: actions/cache@v4
         with:
@@ -43,20 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project:
-          - auth
-          - jobs
-          - auth-e2e
-          - jobs-e2e
-          - auth-db
-          - auth-service
-          - auth-api
-          - users
-          - users-api
-          - jobs-service
-          - jobs-api
-          - common-utils
-          - proto
+        project: ${{ fromJson(needs.setup.outputs.lint-projects) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -84,15 +82,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project:
-          - auth-db
-          - users
-          - auth-service
-          - auth-api
-          - users-api
-          - jobs-service
-          - jobs-api
-          - common-utils
+        project: ${{ fromJson(needs.setup.outputs.test-projects) }}
+        exclude:
+          # Exclude E2E and app projects from unit tests
+          - project: auth
+          - project: jobs
+          - project: auth-e2e
+          - project: jobs-e2e
+          - project: proto
     steps:
       - uses: actions/checkout@v4
 
@@ -138,9 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project:
-          - auth
-          - jobs
+        project: ${{ fromJson(needs.setup.outputs.build-projects) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -187,32 +182,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start Docker Compose services
-        run: docker compose up -d
-
-      - name: Wait for PostgreSQL
-        run: |
-          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'yarn'
-
-      - name: Restore workspace
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            .yarn
-          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
-
-      - run: cp .env.sample .env
-
-      - name: Run database migrations
-        run: yarn nx migrate-prisma auth-db
-        env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+      - uses: ./.github/actions/e2e-setup
 
       - name: Build auth service
         run: yarn nx build auth
@@ -254,32 +224,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start Docker Compose services
-        run: docker compose up -d
-
-      - name: Wait for PostgreSQL
-        run: |
-          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'yarn'
-
-      - name: Restore workspace
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            .yarn
-          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
-
-      - run: cp .env.sample .env
-
-      - name: Run database migrations
-        run: yarn nx migrate-prisma auth-db
-        env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+      - uses: ./.github/actions/e2e-setup
 
       - name: Build auth and jobs services
         run: |

@@ -104,44 +104,62 @@ docker compose down
 
 The GitHub Actions workflow uses a parallelized architecture for faster CI execution:
 
+### Dynamic Project Discovery
+
+The workflow automatically discovers projects from your Nx workspace:
+- **No manual maintenance** - Adding new projects automatically includes them in CI
+- Projects are discovered by their available targets (lint, test, build)
+- Uses `yarn nx show projects --with-target=<target>` to get the list dynamically
+
 ### Parallel Jobs
 
-1. **Setup Job**: Installs dependencies and caches workspace for reuse
-2. **Lint Jobs**: Runs linting for all 13 projects in parallel
-3. **Test Jobs**: Runs tests for all 8 testable projects in parallel with database
-4. **Build Jobs**: Builds auth and jobs applications in parallel
+1. **Setup Job**: Installs dependencies, caches workspace, and discovers all projects
+2. **Lint Jobs**: Runs linting for all projects with lint target in parallel
+3. **Test Jobs**: Runs tests for testable projects in parallel with isolated databases
+4. **Build Jobs**: Builds all buildable projects in parallel
 5. **E2E Jobs**: Runs E2E tests for auth and jobs services in parallel
 
 ### Workflow Structure
 
 ```
-setup (install & cache)
-  ├── lint (13 parallel jobs)
-  ├── test (8 parallel jobs with database)
-  └── build (2 parallel jobs)
+setup (install, cache, discover projects)
+  ├── lint (dynamic parallel jobs based on discovered projects)
+  ├── test (dynamic parallel jobs with database, excluding E2E and apps)
+  └── build (dynamic parallel jobs for buildable projects)
       ├── e2e-auth (starts auth service, runs E2E tests)
       └── e2e-jobs (starts auth + jobs services, runs E2E tests)
 ```
 
+### Reusable Components
+
+- **E2E Setup Action** (`.github/actions/e2e-setup`): Shared setup steps for E2E jobs
+  - Starts docker-compose services
+  - Waits for PostgreSQL
+  - Sets up Node.js and caching
+  - Runs database migrations
+
 ### Benefits
 
+- **Zero maintenance**: New projects are automatically included when you add them
 - **Faster CI**: Parallel execution reduces total CI time
 - **Better isolation**: Each job runs independently with its own environment
 - **Clearer feedback**: Individual job status for each project
 - **Resource efficiency**: Only E2E jobs start application servers
+- **DRY principle**: Reusable action eliminates duplicate code in E2E jobs
 - **Future-proof**: Uses `docker-compose` - new services automatically available
 
 ### E2E Testing in CI
 
 Each E2E job:
-1. Starts required services using docker-compose
-2. Builds the application
-3. Starts the application server in background
+1. Uses shared E2E setup action for common steps
+2. Builds the application(s)
+3. Starts the application server(s) in background
 4. Waits for server to be ready (health check)
 5. Runs E2E tests against the running server
 6. Cleans up services and processes
 
 This approach ensures that:
+- E2E jobs share common setup code via composite action
 - Any new services added to `docker-compose.yaml` are automatically available in CI
 - No duplication between local and CI environments
 - CI environment matches local development exactly

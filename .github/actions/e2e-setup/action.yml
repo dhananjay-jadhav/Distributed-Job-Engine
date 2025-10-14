@@ -1,0 +1,37 @@
+name: 'E2E Test Setup'
+description: 'Sets up environment for E2E testing with database and dependencies'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Start Docker Compose services
+      shell: bash
+      run: docker compose up -d
+
+    - name: Wait for PostgreSQL
+      shell: bash
+      run: |
+        timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: 'yarn'
+
+    - name: Restore workspace
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          .yarn
+        key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+    - name: Copy environment file
+      shell: bash
+      run: cp .env.sample .env
+
+    - name: Run database migrations
+      shell: bash
+      run: yarn nx migrate-prisma auth-db
+      env:
+        DATABASE_URL: postgres://postgres:admin@localhost:5432/auth

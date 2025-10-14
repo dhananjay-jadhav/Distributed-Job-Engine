@@ -11,18 +11,20 @@ As requested, this PR implements proper test cases with minimal mocking. All tes
 ### 1. GitHub CI/CD Configuration (`.github/workflows/ci.yml`)
 
 - **Parallelized workflow** with multiple jobs for faster execution:
-  - Setup job: Installs dependencies and caches workspace
-  - Lint: 13 parallel jobs (one per project)
-  - Test: 8 parallel jobs with database (one per testable project)
-  - Build: 2 parallel jobs (auth and jobs apps)
+  - Setup job: Installs dependencies, caches workspace, and **dynamically discovers projects**
+  - Lint: Parallel jobs based on dynamically discovered projects with lint target
+  - Test: Parallel jobs for testable projects (excluding E2E and apps) with database
+  - Build: Parallel jobs for all buildable projects
   - E2E: 2 parallel jobs (auth-e2e and jobs-e2e)
+- **Dynamic project discovery**: Uses `yarn nx show projects --with-target=<target>` to automatically include new projects
+- **Reusable E2E setup action** (`.github/actions/e2e-setup`): Eliminates duplicate code in E2E jobs
 - Uses `docker-compose` to start all services (PostgreSQL and any future dependencies)
 - E2E jobs start actual application servers and run tests against them
 - Wait steps ensure PostgreSQL is ready before tests run
 - Added database migration step before running tests
 - Set DATABASE_URL environment variable for test execution
 - Automatic cleanup with `docker-compose down`
-- Future-proof: any new services added to `docker-compose.yaml` automatically available in CI
+- **Zero maintenance**: New projects automatically included when added to monorepo
 - **Faster CI execution**: Parallel jobs significantly reduce total CI time
 
 ### 2. Integration Tests (Unit Tests with Real Database)
