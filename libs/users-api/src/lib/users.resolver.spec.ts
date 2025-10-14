@@ -43,7 +43,7 @@ describe('UsersResolver', () => {
       const email = `test-${Date.now()}@example.com`;
       const createUserInput = {
         email,
-        password: 'password123',
+        password: 'Test@Pass123',
       };
 
       const user = await resolver.createUser(createUserInput);
@@ -62,7 +62,7 @@ describe('UsersResolver', () => {
       const email = `test-${Date.now()}@example.com`;
       const createdUser = await userService.createUser({
         email,
-        password: 'password123',
+        password: 'Test@Pass123',
       });
 
       const currentUser = { userId: createdUser.id };

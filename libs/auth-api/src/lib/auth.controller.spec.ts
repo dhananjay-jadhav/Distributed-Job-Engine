@@ -33,7 +33,7 @@ describe('AuthController', () => {
       const email = `test-${Date.now()}@example.com`;
       const createdUser = await userService.createUser({
         email,
-        password: 'password123',
+        password: 'Test@Pass123',
       });
 
       const request = {

@@ -13,6 +13,7 @@ import { AuthApiModule } from '@jobber/auth-api';
 import { LoggerModule } from 'nestjs-pino';
 import createPlugin = require('@newrelic/apollo-server-plugin');
 import { ApolloServerPlugin } from '@apollo/server';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ApolloServerPlugin } from '@apollo/server';
     AuthDbModule,
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
+      path: 'api/graphql',
       autoSchemaFile: {
         path: join(process.cwd(), 'apps/auth/src/schema.gql'),
         federation: 2,
@@ -38,6 +40,7 @@ import { ApolloServerPlugin } from '@apollo/server';
     }),
     UsersApiModule,
     AuthApiModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],
