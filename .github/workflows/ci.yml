@@ -266,20 +266,26 @@ jobs:
 
       - name: Start auth service in background
         run: |
-          yarn nx serve auth &
-          echo $! > auth.pid
+          cd dist/apps/auth && node main.js &
+          echo $! > ../../../auth.pid
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          USER_PORT: 3000
+          AUTH_JWT_SECRET: test-secret-key-for-ci
+          AUTH_JWT_EXPIRES_IN: 300
 
       - name: Wait for auth service
         run: |
-          timeout 60 bash -c 'until curl -s http://localhost:3000/api/graphql > /dev/null; do sleep 2; done'
+          echo "Waiting for auth service to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done'
+          echo "Auth service is ready!"
 
       - name: Run auth E2E tests
         run: yarn nx e2e auth-e2e
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
           PORT: 3000
+          BASE_URL: http://localhost:3000
 
       - name: Stop auth service
         if: always()
@@ -321,25 +327,34 @@ jobs:
 
       - name: Start auth service in background
         run: |
-          yarn nx serve auth &
-          echo $! > auth.pid
+          cd dist/apps/auth && node main.js &
+          echo $! > ../../../auth.pid
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          USER_PORT: 3000
+          AUTH_JWT_SECRET: test-secret-key-for-ci
+          AUTH_JWT_EXPIRES_IN: 300
 
       - name: Wait for auth service
         run: |
-          timeout 60 bash -c 'until curl -s http://localhost:3000/api/graphql > /dev/null; do sleep 2; done'
+          echo "Waiting for auth service to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done'
+          echo "Auth service is ready!"
 
       - name: Start jobs service in background
         run: |
-          yarn nx serve jobs &
-          echo $! > jobs.pid
+          cd dist/apps/jobs && node main.js &
+          echo $! > ../../../jobs.pid
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          JOBS_PORT: 3001
+          AUTH_BASE_URL: http://localhost:3000
 
       - name: Wait for jobs service
         run: |
-          timeout 60 bash -c 'until curl -s http://localhost:3001/api/graphql > /dev/null; do sleep 2; done'
+          echo "Waiting for jobs service to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3001/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done'
+          echo "Jobs service is ready!"
 
       - name: Run jobs E2E tests
         run: yarn nx e2e jobs-e2e
