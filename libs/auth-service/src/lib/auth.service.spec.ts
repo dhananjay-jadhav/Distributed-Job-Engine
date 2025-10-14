@@ -45,7 +45,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should login user with valid credentials', async () => {
       const email = `test-${Date.now()}@example.com`;
-      const password = 'password123';
+      const password = 'Test@Pass123';
 
       // Create test user
       const createdUser = await userService.createUser({
@@ -89,7 +89,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException for wrong password', async () => {
       const email = `test-${Date.now()}@example.com`;
-      const password = 'password123';
+      const password = 'Test@Pass123';
 
       // Create test user
       const createdUser = await userService.createUser({
@@ -113,7 +113,7 @@ describe('AuthService', () => {
   describe('verifyUser', () => {
     it('should verify user with correct credentials', async () => {
       const email = `test-${Date.now()}@example.com`;
-      const password = 'password123';
+      const password = 'Test@Pass123';
 
       // Create test user
       const createdUser = await userService.createUser({

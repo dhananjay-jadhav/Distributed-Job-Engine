@@ -47,7 +47,7 @@ describe('AuthResolver', () => {
   describe('login', () => {
     it('should login user successfully', async () => {
       const email = `test-${Date.now()}@example.com`;
-      const password = 'password123';
+      const password = 'Test@Pass123';
 
       // Create test user
       const createdUser = await userService.createUser({

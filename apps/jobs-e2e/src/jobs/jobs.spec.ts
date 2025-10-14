@@ -25,7 +25,7 @@ describe('Jobs E2E Tests', () => {
     try {
       // Create a test user and login to get auth cookie
       const testEmail = `test-jobs-${Date.now()}@example.com`;
-      const testPassword = 'password123';
+      const testPassword = 'Test@Pass123';
 
       // Create user
       const createMutation = `

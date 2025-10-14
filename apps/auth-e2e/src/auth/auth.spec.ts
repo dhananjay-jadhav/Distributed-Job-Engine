@@ -17,7 +17,7 @@ describe('Auth E2E Tests', () => {
 
   describe('GraphQL Mutations', () => {
     const testEmail = `test-${Date.now()}@example.com`;
-    const testPassword = 'password123';
+    const testPassword = 'Test@Pass123';
 
     it('should create a user', async () => {
       const mutation = `
@@ -162,7 +162,7 @@ describe('Auth E2E Tests', () => {
     let authCookie: string;
     let testUserId: string;
     const testEmail = `test-query-${Date.now()}@example.com`;
-    const testPassword = 'password123';
+    const testPassword = 'Test@Pass123';
 
     beforeAll(async () => {
       try {

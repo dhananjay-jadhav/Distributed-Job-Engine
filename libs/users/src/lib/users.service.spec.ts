@@ -28,13 +28,13 @@ describe('UserService', () => {
       const email = `test-${Date.now()}@example.com`;
       const user = await service.createUser({
         email,
-        password: 'password123',
+        password: 'Test@Pass123',
       });
 
       expect(user).toBeDefined();
       expect(user.email).toBe(email);
       expect(user.id).toBeDefined();
-      expect(user.password).not.toBe('password123'); // password should be hashed
+      expect(user.password).not.toBe('Test@Pass123'); // password should be hashed
 
       // Cleanup
       await authDbService.user.delete({ where: { id: user.id } });
@@ -46,7 +46,7 @@ describe('UserService', () => {
       const email = `test-${Date.now()}@example.com`;
       const createdUser = await service.createUser({
         email,
-        password: 'password123',
+        password: 'Test@Pass123',
       });
 
       const user = await service.getUserbyId(createdUser.id);
@@ -73,7 +73,7 @@ describe('UserService', () => {
       const email = `test-${Date.now()}@example.com`;
       const createdUser = await service.createUser({
         email,
-        password: 'password123',
+        password: 'Test@Pass123',
       });
 
       const user = await service.getUser({ email });
