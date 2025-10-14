@@ -8,7 +8,6 @@ import { CurrentUser, GQLAuthGuard } from '@jobber/auth-service';
 export class UsersResolver {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(GQLAuthGuard)
   @Mutation(() => UserType, { name: 'createUser' })
   async createUser(
     @Args('createUserInput') createUserInput: CreateUserInput
