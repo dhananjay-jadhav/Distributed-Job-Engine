@@ -297,6 +297,37 @@ Format code using Prettier:
 yarn format
 ```
 
+## 🧪 Comprehensive Testing
+
+This project includes comprehensive tests with minimal mocking, using real database instances for integration testing.
+
+### Quick Start
+
+1. Start the database:
+```bash
+docker compose up -d
+```
+
+2. Run migrations:
+```bash
+yarn nx migrate-prisma auth-db
+```
+
+3. Run all tests:
+```bash
+yarn nx run-many -t test
+```
+
+For detailed testing instructions, see [TESTING.md](TESTING.md).
+
+### Test Coverage
+
+- ✅ Unit tests with real database integration
+- ✅ Service layer tests
+- ✅ Resolver and controller tests
+- ✅ E2E tests for GraphQL API
+- ✅ GitHub Actions CI with parallel jobs and PostgreSQL service
+
 ## 🏗️ Project Structure
 
 ```

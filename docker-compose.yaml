@@ -7,3 +7,4 @@ services:
       - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
     environment:
       POSTGRES_PASSWORD: admin
+      POSTGRES_DB: auth

@@ -12,7 +12,21 @@ describe('AuthDbService', () => {
     service = module.get<AuthDbService>(AuthDbService);
   });
 
+  afterAll(async () => {
+    await service.$disconnect();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should connect to database', async () => {
+    await expect(service.$connect()).resolves.not.toThrow();
+  });
+
+  it('should execute raw queries', async () => {
+    const result = await service.$queryRaw`SELECT 1 as value`;
+    expect(result).toBeDefined();
+    expect(Array.isArray(result)).toBe(true);
   });
 });

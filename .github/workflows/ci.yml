@@ -11,30 +11,432 @@ permissions:
   contents: read
 
 jobs:
-  main:
+  # Setup and shared dependencies
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      lint-projects: ${{ steps.get-projects.outputs.lint }}
+      test-projects: ${{ steps.get-projects.outputs.test }}
+      build-projects: ${{ steps.get-projects.outputs.build }}
+      cache-key: ${{ steps.cache-keys.outputs.workspace }}
+      nx-cache-key: ${{ steps.cache-keys.outputs.nx }}
     steps:
       - uses: actions/checkout@v4
         with:
           filter: tree:0
           fetch-depth: 0
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
-
-      # Cache node_modules
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'yarn'
 
+      - name: Generate cache keys
+        id: cache-keys
+        run: |
+          echo "workspace=${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}" >> $GITHUB_OUTPUT
+          echo "nx=${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}" >> $GITHUB_OUTPUT
+
       - run: cp .env.sample .env
 
-      - run: yarn install --immutable
+      # Restore node_modules cache
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ steps.cache-keys.outputs.workspace }}
+          restore-keys: |
+            ${{ runner.os }}-workspace-
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: yarn nx-cloud record -- echo Hello World
-      - run: yarn nx run-many -t lint test build
+      # Install only if cache miss
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      # Cache Nx computation cache
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: ${{ steps.cache-keys.outputs.nx }}-${{ github.sha }}
+          restore-keys: |
+            ${{ steps.cache-keys.outputs.nx }}-
+            ${{ runner.os }}-nx-
+
+      - name: Get project lists
+        id: get-projects
+        run: |
+          echo "lint=$(yarn nx show projects --with-target=lint 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "test=$(yarn nx show projects --with-target=test 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "build=$(yarn nx show projects --with-target=build 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+
+  # Lint all projects in parallel
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.setup.outputs.lint-projects) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore Nx cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+            ${{ runner.os }}-nx-
+
+      - run: cp .env.sample .env
+
+      - name: Lint ${{ matrix.project }}
+        run: yarn nx lint ${{ matrix.project }}
+
+  # Test all projects in parallel (with database)
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.setup.outputs.test-projects) }}
+        exclude:
+          # Exclude E2E and app projects from unit tests
+          - project: auth
+          - project: jobs
+          - project: auth-e2e
+          - project: jobs-e2e
+          - project: proto
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore Nx cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+            ${{ runner.os }}-nx-
+
+      - run: cp .env.sample .env
+
+      - name: Run database migrations
+        run: yarn nx migrate-prisma auth-db
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Test ${{ matrix.project }}
+        run: yarn nx test ${{ matrix.project }}
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
+
+  # Build all projects in parallel
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.setup.outputs.build-projects) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore Nx cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
+            ${{ runner.os }}-nx-
+
+      # Cache build outputs
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            apps/*/dist
+          key: ${{ runner.os }}-build-${{ matrix.project }}-${{ github.sha }}
+
+      - run: cp .env.sample .env
+
+      - name: Run database migrations
+        run: yarn nx migrate-prisma auth-db
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Build ${{ matrix.project }}
+        run: yarn nx build ${{ matrix.project }}
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
+
+  # E2E test for auth service
+  e2e-auth:
+    needs: [lint, test, build, setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/e2e-setup
+        with:
+          cache-key: ${{ needs.setup.outputs.cache-key }}
+          nx-cache-key: ${{ needs.setup.outputs.nx-cache-key }}-${{ github.sha }}
+
+      - name: Restore build outputs
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            dist
+            apps/*/dist
+          key: ${{ runner.os }}-build-auth-${{ github.sha }}
+
+      - name: Build auth service
+        run: yarn nx build auth
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Check build output
+        run: |
+          echo "Checking build output..."
+          ls -la dist/apps/auth/
+          echo "Contents of main files..."
+          head -20 dist/apps/auth/main.js || echo "main.js not found"
+
+      - name: Start auth service in background
+        run: |
+          echo "Starting auth service..."
+          cd dist/apps/auth
+          NODE_ENV=production node main.js > ../../../auth.log 2>&1 &
+          echo $! > ../../../auth.pid
+          echo "Auth service started with PID $(cat ../../../auth.pid)"
+          sleep 3
+          echo "Checking if process is still running..."
+          if ps -p $(cat ../../../auth.pid) > /dev/null; then
+            echo "Process is running"
+          else
+            echo "Process died! Check logs:"
+            cat ../../../auth.log
+            exit 1
+          fi
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          USER_PORT: 3000
+          AUTH_JWT_SECRET: test-secret-key-for-ci
+          AUTH_JWT_EXPIRES_IN: 300
+
+      - name: Wait for auth service
+        run: |
+          echo "Waiting for auth service to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done' || {
+            echo "Failed to start! Checking logs and process status..."
+            if [ -f auth.pid ]; then
+              PID=$(cat auth.pid)
+              if ps -p $PID > /dev/null; then
+                echo "Process $PID is still running but not responding"
+              else
+                echo "Process $PID has died"
+              fi
+            fi
+            echo "=== Application logs ==="
+            cat auth.log || echo "No log file found"
+            exit 1
+          }
+          echo "Auth service is ready!"
+
+      - name: Run auth E2E tests
+        run: yarn nx e2e auth-e2e
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          PORT: 3000
+          BASE_URL: http://localhost:3000
+
+      - name: Stop auth service
+        if: always()
+        run: |
+          if [ -f auth.pid ]; then
+            kill $(cat auth.pid) || true
+          fi
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
+
+  # E2E test for jobs service
+  e2e-jobs:
+    needs: [lint, test, build, setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/e2e-setup
+        with:
+          cache-key: ${{ needs.setup.outputs.cache-key }}
+          nx-cache-key: ${{ needs.setup.outputs.nx-cache-key }}-${{ github.sha }}
+
+      - name: Restore build outputs
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            dist
+            apps/*/dist
+          key: ${{ runner.os }}-build-jobs-${{ github.sha }}
+
+      - name: Build auth and jobs services
+        run: |
+          yarn nx build auth
+          yarn nx build jobs
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Start auth service in background
+        run: |
+          echo "Starting auth service..."
+          cd dist/apps/auth
+          NODE_ENV=production node main.js > ../../../auth.log 2>&1 &
+          echo $! > ../../../auth.pid
+          echo "Auth service started with PID $(cat ../../../auth.pid)"
+          sleep 3
+          echo "Checking if process is still running..."
+          if ps -p $(cat ../../../auth.pid) > /dev/null; then
+            echo "Process is running"
+          else
+            echo "Process died! Check logs:"
+            cat ../../../auth.log
+            exit 1
+          fi
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          USER_PORT: 3000
+          AUTH_JWT_SECRET: test-secret-key-for-ci
+          AUTH_JWT_EXPIRES_IN: 300
+
+      - name: Wait for auth service
+        run: |
+          echo "Waiting for auth service to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done' || {
+            echo "Failed to start! Checking logs..."
+            cat auth.log || echo "No log file found"
+            exit 1
+          }
+          echo "Auth service is ready!"
+
+      - name: Start jobs service in background
+        run: |
+          echo "Starting jobs service..."
+          cd dist/apps/jobs
+          NODE_ENV=production node main.js > ../../../jobs.log 2>&1 &
+          echo $! > ../../../jobs.pid
+          echo "Jobs service started with PID $(cat ../../../jobs.pid)"
+          sleep 3
+          echo "Checking if process is still running..."
+          if ps -p $(cat ../../../jobs.pid) > /dev/null; then
+            echo "Process is running"
+          else
+            echo "Process died! Check logs:"
+            cat ../../../jobs.log
+            exit 1
+          fi
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          JOBS_PORT: 3001
+          AUTH_BASE_URL: http://localhost:3000
+
+      - name: Wait for jobs service
+        run: |
+          echo "Waiting for jobs service to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3001/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done' || {
+            echo "Failed to start! Checking logs..."
+            cat jobs.log || echo "No log file found"
+            exit 1
+          }
+          echo "Jobs service is ready!"
+
+      - name: Run jobs E2E tests
+        run: yarn nx e2e jobs-e2e
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          PORT: 3001
+          AUTH_BASE_URL: http://localhost:3000
+
+      - name: Stop services
+        if: always()
+        run: |
+          if [ -f auth.pid ]; then
+            kill $(cat auth.pid) || true
+          fi
+          if [ -f jobs.pid ]; then
+            kill $(cat jobs.pid) || true
+          fi
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
