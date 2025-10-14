@@ -104,9 +104,16 @@ docker compose down
 
 The GitHub Actions workflow automatically:
 
-1. Starts a PostgreSQL service container
-2. Runs database migrations
-3. Executes all unit and integration tests
+1. Starts services using `docker-compose` (PostgreSQL and any future dependencies)
+2. Waits for PostgreSQL to be ready
+3. Runs database migrations
+4. Executes all unit and integration tests
+5. Cleans up docker-compose services
+
+This approach ensures that:
+- Any new services added to `docker-compose.yaml` are automatically available in CI
+- No need to duplicate service configurations between local and CI environments
+- CI environment matches local development environment exactly
 
 The workflow is configured in `.github/workflows/ci.yml`.
 

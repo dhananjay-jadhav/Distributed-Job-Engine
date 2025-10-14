@@ -10,10 +10,12 @@ As requested, this PR implements proper test cases with minimal mocking. All tes
 
 ### 1. GitHub CI/CD Configuration (`.github/workflows/ci.yml`)
 
-- Added PostgreSQL service container to GitHub Actions workflow
-- Configured health checks to ensure database is ready before tests run
+- Uses `docker-compose` to start all services (PostgreSQL and any future dependencies)
+- Wait step ensures PostgreSQL is ready before tests run
 - Added database migration step before running tests
 - Set DATABASE_URL environment variable for test execution
+- Automatic cleanup with `docker-compose down`
+- Future-proof: any new services added to `docker-compose.yaml` automatically available in CI
 
 ### 2. Integration Tests (Unit Tests with Real Database)
 

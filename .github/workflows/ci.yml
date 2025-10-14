@@ -14,20 +14,6 @@ jobs:
   main:
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_PASSWORD: admin
-          POSTGRES_DB: auth
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,6 +25,15 @@ jobs:
       # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
       # Uncomment this line to enable task distribution
       # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
+
+      # Start services using docker-compose
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      # Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
 
       # Cache node_modules
       - uses: actions/setup-node@v4
@@ -61,3 +56,8 @@ jobs:
       - run: yarn nx run-many -t lint test build
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      # Cleanup
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
