@@ -5,7 +5,6 @@ describe('Auth E2E Tests', () => {
   const apiUrl = `${baseUrl}/api/graphql`;
 
   describe('GraphQL Mutations', () => {
-    let testUserId: string;
     const testEmail = `test-${Date.now()}@example.com`;
     const testPassword = 'password123';
 
@@ -33,8 +32,6 @@ describe('Auth E2E Tests', () => {
       expect(res.data.data.createUser).toBeDefined();
       expect(res.data.data.createUser.email).toBe(testEmail);
       expect(res.data.data.createUser.id).toBeDefined();
-
-      testUserId = res.data.data.createUser.id;
     });
 
     it('should login with created user', async () => {
@@ -84,9 +81,13 @@ describe('Auth E2E Tests', () => {
           },
         });
         fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.response.status).toBe(200);
-        expect(error.response.data.errors).toBeDefined();
+      } catch (error) {
+        expect(error).toBeDefined();
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response: { status: number; data: { errors: unknown } } };
+          expect(axiosError.response.status).toBe(200);
+          expect(axiosError.response.data.errors).toBeDefined();
+        }
       }
     });
   });
@@ -192,9 +193,13 @@ describe('Auth E2E Tests', () => {
           },
         });
         fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.response.status).toBe(200);
-        expect(error.response.data.errors).toBeDefined();
+      } catch (error) {
+        expect(error).toBeDefined();
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response: { status: number; data: { errors: unknown } } };
+          expect(axiosError.response.status).toBe(200);
+          expect(axiosError.response.data.errors).toBeDefined();
+        }
       }
     });
   });

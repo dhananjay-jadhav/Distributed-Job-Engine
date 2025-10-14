@@ -60,23 +60,67 @@ USER_PORT=3000
 
 ## 🚀 Running the Application
 
-1. Start the authentication service:
+1. Start the database:
+
+```bash
+docker compose up -d
+```
+
+2. Run database migrations:
+
+```bash
+yarn nx migrate-prisma auth-db
+```
+
+3. Start the authentication service:
 
 ```bash
 yarn nx serve auth
 ```
 
-2. Build for production:
+4. Start the jobs service (in a separate terminal):
+
+```bash
+yarn nx serve jobs
+```
+
+5. Build for production:
 
 ```bash
 yarn nx build auth
+yarn nx build jobs
 ```
 
-3. Run tests:
+## 🧪 Testing
 
+This project includes comprehensive tests with minimal mocking, using real database instances for integration testing.
+
+### Quick Start
+
+1. Start the database:
 ```bash
-yarn nx test auth
+docker compose up -d
 ```
+
+2. Run migrations:
+```bash
+yarn nx migrate-prisma auth-db
+```
+
+3. Run all tests:
+```bash
+yarn nx run-many -t test
+```
+
+For detailed testing instructions, see [TESTING.md](TESTING.md).
+
+### Test Coverage
+
+- ✅ Unit tests with real database integration
+- ✅ Service layer tests
+- ✅ Resolver and controller tests
+- ✅ E2E tests for GraphQL API
+- ✅ GitHub Actions CI with PostgreSQL service
 
 ## 🏗️ Project Structure
 

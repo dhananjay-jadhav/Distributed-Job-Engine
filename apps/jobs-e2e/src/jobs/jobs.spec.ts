@@ -137,9 +137,13 @@ describe('Jobs E2E Tests', () => {
           query,
         });
         fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.response.status).toBe(200);
-        expect(error.response.data.errors).toBeDefined();
+      } catch (error) {
+        expect(error).toBeDefined();
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response: { status: number; data: { errors: unknown } } };
+          expect(axiosError.response.status).toBe(200);
+          expect(axiosError.response.data.errors).toBeDefined();
+        }
       }
     });
   });
@@ -193,9 +197,13 @@ describe('Jobs E2E Tests', () => {
           },
         });
         fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.response.status).toBe(200);
-        expect(error.response.data.errors).toBeDefined();
+      } catch (error) {
+        expect(error).toBeDefined();
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response: { status: number; data: { errors: unknown } } };
+          expect(axiosError.response.status).toBe(200);
+          expect(axiosError.response.data.errors).toBeDefined();
+        }
       }
     });
 
@@ -225,9 +233,13 @@ describe('Jobs E2E Tests', () => {
           }
         );
         fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.response.status).toBe(200);
-        expect(error.response.data.errors).toBeDefined();
+      } catch (error) {
+        expect(error).toBeDefined();
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response: { status: number; data: { errors: unknown } } };
+          expect(axiosError.response.status).toBe(200);
+          expect(axiosError.response.data.errors).toBeDefined();
+        }
       }
     });
   });

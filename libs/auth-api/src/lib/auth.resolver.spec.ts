@@ -7,6 +7,7 @@ import { UsersModule } from '@jobber/users';
 import { UserService } from '@jobber/users';
 import { AuthDbService } from '@jobber/auth-db';
 import { Response } from 'express';
+import * as Express from 'express';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
@@ -59,7 +60,7 @@ describe('AuthResolver', () => {
       } as unknown as Response;
 
       const context = {
-        req: {} as any,
+        req: {} as Express.Request,
         res: mockResponse,
       };
 
