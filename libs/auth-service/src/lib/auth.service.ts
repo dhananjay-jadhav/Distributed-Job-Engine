@@ -5,6 +5,7 @@ import { compare } from 'bcrypt';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma-clients/auth-db';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async login(loginInput: LoginInput, res: Response) {
+  async login(loginInput: LoginInput, res: Response): Promise<{ id: string; email: string }> {
     const { email, password } = loginInput;
     const user = await this.verifyUser(email, password);
     const expires = new Date();
@@ -40,7 +41,7 @@ export class AuthService {
     };
   }
 
-  async verifyUser(email: string, password: string) {
+  async verifyUser(email: string, password: string): Promise<Prisma.UserGetPayload<object>> {
     try {
       const user = await this.userService.getUser({
         email,

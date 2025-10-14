@@ -13,7 +13,7 @@ import { AUTH_PACKAGE_NAME } from '@jobber/proto';
 import { join } from 'path';
 import { Logger } from 'nestjs-pino';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const globalPrefix = 'api';
   const logger = app.get(Logger);

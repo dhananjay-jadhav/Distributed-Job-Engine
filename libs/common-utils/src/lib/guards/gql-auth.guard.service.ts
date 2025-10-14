@@ -24,7 +24,7 @@ export class GqlAuthGuardService implements CanActivate, OnModuleInit {
     private readonly logger: PinoLogger
   ) {}
 
-  onModuleInit() {
+  onModuleInit(): void {
     this.authServiceClient = this.client.getService<AuthSericeClient>(
       AUTH_SERICE_SERVICE_NAME
     );
@@ -51,7 +51,8 @@ export class GqlAuthGuardService implements CanActivate, OnModuleInit {
     );
   }
 
-  getRequest(context: ExecutionContext) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getRequest(context: ExecutionContext): any {
     const ctx = GqlExecutionContext.create(context);
     return ctx.getContext().req;
   }

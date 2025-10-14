@@ -13,7 +13,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req) => req?.cookies?.Authentication || req?.token,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (req: any): string | null => req?.cookies?.Authentication || req?.token,
       ]),
       secretOrKey: configService.getOrThrow('AUTH_JWT_SECRET'),
     });
