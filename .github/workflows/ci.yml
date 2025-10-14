@@ -13,6 +13,21 @@ permissions:
 jobs:
   main:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: auth
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +50,14 @@ jobs:
 
       - run: yarn install --immutable
 
+      # Run Prisma migrations
+      - name: Run database migrations
+        run: yarn nx migrate-prisma auth-db
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: yarn nx-cloud record -- echo Hello World
       - run: yarn nx run-many -t lint test build
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
