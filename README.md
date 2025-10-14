@@ -270,11 +270,6 @@ yarn all:test
 
 Run tests for a specific project:
 
-This project includes comprehensive tests with minimal mocking, using real database instances for integration testing.
-
-### Quick Start
-
-1. Start the database:
 ```bash
 yarn nx test auth
 yarn nx test jobs
@@ -302,6 +297,17 @@ Format code using Prettier:
 yarn format
 ```
 
+## 🧪 Comprehensive Testing
+
+This project includes comprehensive tests with minimal mocking, using real database instances for integration testing.
+
+### Quick Start
+
+1. Start the database:
+```bash
+docker compose up -d
+```
+
 2. Run migrations:
 ```bash
 yarn nx migrate-prisma auth-db
@@ -320,7 +326,7 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 - ✅ Service layer tests
 - ✅ Resolver and controller tests
 - ✅ E2E tests for GraphQL API
-- ✅ GitHub Actions CI with PostgreSQL service
+- ✅ GitHub Actions CI with parallel jobs and PostgreSQL service
 
 ## 🏗️ Project Structure
 
