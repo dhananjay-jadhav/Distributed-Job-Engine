@@ -10,12 +10,20 @@ As requested, this PR implements proper test cases with minimal mocking. All tes
 
 ### 1. GitHub CI/CD Configuration (`.github/workflows/ci.yml`)
 
+- **Parallelized workflow** with multiple jobs for faster execution:
+  - Setup job: Installs dependencies and caches workspace
+  - Lint: 13 parallel jobs (one per project)
+  - Test: 8 parallel jobs with database (one per testable project)
+  - Build: 2 parallel jobs (auth and jobs apps)
+  - E2E: 2 parallel jobs (auth-e2e and jobs-e2e)
 - Uses `docker-compose` to start all services (PostgreSQL and any future dependencies)
-- Wait step ensures PostgreSQL is ready before tests run
+- E2E jobs start actual application servers and run tests against them
+- Wait steps ensure PostgreSQL is ready before tests run
 - Added database migration step before running tests
 - Set DATABASE_URL environment variable for test execution
 - Automatic cleanup with `docker-compose down`
 - Future-proof: any new services added to `docker-compose.yaml` automatically available in CI
+- **Faster CI execution**: Parallel jobs significantly reduce total CI time
 
 ### 2. Integration Tests (Unit Tests with Real Database)
 

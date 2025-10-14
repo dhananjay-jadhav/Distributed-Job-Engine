@@ -102,18 +102,50 @@ docker compose down
 
 ## GitHub CI/CD
 
-The GitHub Actions workflow automatically:
+The GitHub Actions workflow uses a parallelized architecture for faster CI execution:
 
-1. Starts services using `docker-compose` (PostgreSQL and any future dependencies)
-2. Waits for PostgreSQL to be ready
-3. Runs database migrations
-4. Executes all unit and integration tests
-5. Cleans up docker-compose services
+### Parallel Jobs
+
+1. **Setup Job**: Installs dependencies and caches workspace for reuse
+2. **Lint Jobs**: Runs linting for all 13 projects in parallel
+3. **Test Jobs**: Runs tests for all 8 testable projects in parallel with database
+4. **Build Jobs**: Builds auth and jobs applications in parallel
+5. **E2E Jobs**: Runs E2E tests for auth and jobs services in parallel
+
+### Workflow Structure
+
+```
+setup (install & cache)
+  ├── lint (13 parallel jobs)
+  ├── test (8 parallel jobs with database)
+  └── build (2 parallel jobs)
+      ├── e2e-auth (starts auth service, runs E2E tests)
+      └── e2e-jobs (starts auth + jobs services, runs E2E tests)
+```
+
+### Benefits
+
+- **Faster CI**: Parallel execution reduces total CI time
+- **Better isolation**: Each job runs independently with its own environment
+- **Clearer feedback**: Individual job status for each project
+- **Resource efficiency**: Only E2E jobs start application servers
+- **Future-proof**: Uses `docker-compose` - new services automatically available
+
+### E2E Testing in CI
+
+Each E2E job:
+1. Starts required services using docker-compose
+2. Builds the application
+3. Starts the application server in background
+4. Waits for server to be ready (health check)
+5. Runs E2E tests against the running server
+6. Cleans up services and processes
 
 This approach ensures that:
 - Any new services added to `docker-compose.yaml` are automatically available in CI
-- No need to duplicate service configurations between local and CI environments
-- CI environment matches local development environment exactly
+- No duplication between local and CI environments
+- CI environment matches local development exactly
+- E2E tests run against real running applications
 
 The workflow is configured in `.github/workflows/ci.yml`.
 

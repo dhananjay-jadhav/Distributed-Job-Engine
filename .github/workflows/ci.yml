@@ -11,31 +11,15 @@ permissions:
   contents: read
 
 jobs:
-  main:
+  # Setup and shared dependencies
+  setup:
     runs-on: ubuntu-latest
-    
     steps:
       - uses: actions/checkout@v4
         with:
           filter: tree:0
           fetch-depth: 0
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
-
-      # Start services using docker-compose
-      - name: Start Docker Compose services
-        run: docker compose up -d
-
-      # Wait for PostgreSQL to be ready
-      - name: Wait for PostgreSQL
-        run: |
-          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
-
-      # Cache node_modules
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -45,19 +29,304 @@ jobs:
 
       - run: yarn install --immutable
 
-      # Run Prisma migrations
+      - name: Cache workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+  # Lint all projects in parallel
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - auth
+          - jobs
+          - auth-e2e
+          - jobs-e2e
+          - auth-db
+          - auth-service
+          - auth-api
+          - users
+          - users-api
+          - jobs-service
+          - jobs-api
+          - common-utils
+          - proto
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+      - run: cp .env.sample .env
+
+      - name: Lint ${{ matrix.project }}
+        run: yarn nx lint ${{ matrix.project }}
+
+  # Test all projects in parallel (with database)
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - auth-db
+          - users
+          - auth-service
+          - auth-api
+          - users-api
+          - jobs-service
+          - jobs-api
+          - common-utils
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+      - run: cp .env.sample .env
+
       - name: Run database migrations
         run: yarn nx migrate-prisma auth-db
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: yarn nx-cloud record -- echo Hello World
-      - run: yarn nx run-many -t lint test build
+      - name: Test ${{ matrix.project }}
+        run: yarn nx test ${{ matrix.project }}
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
 
-      # Cleanup
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
+
+  # Build all projects in parallel
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - auth
+          - jobs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+      - run: cp .env.sample .env
+
+      - name: Run database migrations
+        run: yarn nx migrate-prisma auth-db
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Build ${{ matrix.project }}
+        run: yarn nx build ${{ matrix.project }}
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
+
+  # E2E test for auth service
+  e2e-auth:
+    needs: [lint, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+      - run: cp .env.sample .env
+
+      - name: Run database migrations
+        run: yarn nx migrate-prisma auth-db
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Build auth service
+        run: yarn nx build auth
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Start auth service in background
+        run: |
+          yarn nx serve auth &
+          echo $! > auth.pid
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Wait for auth service
+        run: |
+          timeout 60 bash -c 'until curl -s http://localhost:3000/api/graphql > /dev/null; do sleep 2; done'
+
+      - name: Run auth E2E tests
+        run: yarn nx e2e auth-e2e
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          PORT: 3000
+
+      - name: Stop auth service
+        if: always()
+        run: |
+          if [ -f auth.pid ]; then
+            kill $(cat auth.pid) || true
+          fi
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose down
+
+  # E2E test for jobs service
+  e2e-jobs:
+    needs: [lint, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 1; done'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Restore workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: ${{ runner.os }}-workspace-${{ hashFiles('yarn.lock') }}
+
+      - run: cp .env.sample .env
+
+      - name: Run database migrations
+        run: yarn nx migrate-prisma auth-db
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Build auth and jobs services
+        run: |
+          yarn nx build auth
+          yarn nx build jobs
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Start auth service in background
+        run: |
+          yarn nx serve auth &
+          echo $! > auth.pid
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Wait for auth service
+        run: |
+          timeout 60 bash -c 'until curl -s http://localhost:3000/api/graphql > /dev/null; do sleep 2; done'
+
+      - name: Start jobs service in background
+        run: |
+          yarn nx serve jobs &
+          echo $! > jobs.pid
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+
+      - name: Wait for jobs service
+        run: |
+          timeout 60 bash -c 'until curl -s http://localhost:3001/api/graphql > /dev/null; do sleep 2; done'
+
+      - name: Run jobs E2E tests
+        run: yarn nx e2e jobs-e2e
+        env:
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+          PORT: 3001
+          AUTH_BASE_URL: http://localhost:3000
+
+      - name: Stop services
+        if: always()
+        run: |
+          if [ -f auth.pid ]; then
+            kill $(cat auth.pid) || true
+          fi
+          if [ -f jobs.pid ]; then
+            kill $(cat jobs.pid) || true
+          fi
+
       - name: Stop Docker Compose services
         if: always()
         run: docker compose down
