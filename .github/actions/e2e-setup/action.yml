@@ -5,6 +5,9 @@ inputs:
   cache-key:
     description: 'Cache key for node_modules'
     required: true
+  nx-cache-key:
+    description: 'Cache key for Nx cache'
+    required: true
 
 runs:
   using: 'composite'
@@ -36,10 +39,9 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: .nx/cache
-        key: ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-${{ github.sha }}
+        key: ${{ inputs.nx-cache-key }}
         restore-keys: |
-          ${{ runner.os }}-nx-${{ hashFiles('nx.json', 'package.json', '**/project.json') }}-
-          ${{ runner.os }}-nx-
+          ${{ inputs.nx-cache-key }}
 
     - name: Copy environment file
       shell: bash
