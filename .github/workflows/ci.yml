@@ -264,10 +264,29 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
 
+      - name: Check build output
+        run: |
+          echo "Checking build output..."
+          ls -la dist/apps/auth/
+          echo "Contents of main files..."
+          head -20 dist/apps/auth/main.js || echo "main.js not found"
+
       - name: Start auth service in background
         run: |
-          cd dist/apps/auth && node main.js &
+          echo "Starting auth service..."
+          cd dist/apps/auth
+          NODE_ENV=production node main.js > ../../../auth.log 2>&1 &
           echo $! > ../../../auth.pid
+          echo "Auth service started with PID $(cat ../../../auth.pid)"
+          sleep 3
+          echo "Checking if process is still running..."
+          if ps -p $(cat ../../../auth.pid) > /dev/null; then
+            echo "Process is running"
+          else
+            echo "Process died! Check logs:"
+            cat ../../../auth.log
+            exit 1
+          fi
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
           USER_PORT: 3000
@@ -277,7 +296,20 @@ jobs:
       - name: Wait for auth service
         run: |
           echo "Waiting for auth service to start..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done' || {
+            echo "Failed to start! Checking logs and process status..."
+            if [ -f auth.pid ]; then
+              PID=$(cat auth.pid)
+              if ps -p $PID > /dev/null; then
+                echo "Process $PID is still running but not responding"
+              else
+                echo "Process $PID has died"
+              fi
+            fi
+            echo "=== Application logs ==="
+            cat auth.log || echo "No log file found"
+            exit 1
+          }
           echo "Auth service is ready!"
 
       - name: Run auth E2E tests
@@ -327,8 +359,20 @@ jobs:
 
       - name: Start auth service in background
         run: |
-          cd dist/apps/auth && node main.js &
+          echo "Starting auth service..."
+          cd dist/apps/auth
+          NODE_ENV=production node main.js > ../../../auth.log 2>&1 &
           echo $! > ../../../auth.pid
+          echo "Auth service started with PID $(cat ../../../auth.pid)"
+          sleep 3
+          echo "Checking if process is still running..."
+          if ps -p $(cat ../../../auth.pid) > /dev/null; then
+            echo "Process is running"
+          else
+            echo "Process died! Check logs:"
+            cat ../../../auth.log
+            exit 1
+          fi
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
           USER_PORT: 3000
@@ -338,13 +382,29 @@ jobs:
       - name: Wait for auth service
         run: |
           echo "Waiting for auth service to start..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done' || {
+            echo "Failed to start! Checking logs..."
+            cat auth.log || echo "No log file found"
+            exit 1
+          }
           echo "Auth service is ready!"
 
       - name: Start jobs service in background
         run: |
-          cd dist/apps/jobs && node main.js &
+          echo "Starting jobs service..."
+          cd dist/apps/jobs
+          NODE_ENV=production node main.js > ../../../jobs.log 2>&1 &
           echo $! > ../../../jobs.pid
+          echo "Jobs service started with PID $(cat ../../../jobs.pid)"
+          sleep 3
+          echo "Checking if process is still running..."
+          if ps -p $(cat ../../../jobs.pid) > /dev/null; then
+            echo "Process is running"
+          else
+            echo "Process died! Check logs:"
+            cat ../../../jobs.log
+            exit 1
+          fi
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
           JOBS_PORT: 3001
@@ -353,7 +413,11 @@ jobs:
       - name: Wait for jobs service
         run: |
           echo "Waiting for jobs service to start..."
-          timeout 60 bash -c 'until curl -f http://localhost:3001/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3001/api/graphql 2>/dev/null; do echo "Waiting..."; sleep 2; done' || {
+            echo "Failed to start! Checking logs..."
+            cat jobs.log || echo "No log file found"
+            exit 1
+          }
           echo "Jobs service is ready!"
 
       - name: Run jobs E2E tests
