@@ -2,13 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobsService } from './jobs.service';
 import { DiscoveryModule } from '@golevelup/nestjs-discovery';
 import { FibonacciJob } from './jobs/fibonacci.job';
+import { ConfigModule } from '@nestjs/config';
+import { ApachePulsarModule } from '@jobber/apache-pulsar';
 
 describe('JobsService', () => {
   let service: JobsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DiscoveryModule],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+        }),
+        ApachePulsarModule,
+        DiscoveryModule,
+      ],
       providers: [JobsService, FibonacciJob],
     }).compile();
 
