@@ -8,3 +8,21 @@ services:
     environment:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: auth
+
+  pulsar:
+    image: apachepulsar/pulsar:latest
+    ports:
+      - 6650:6650
+    command: /pulsar/bin/pulsar standalone
+
+  dashboard:
+    image: apachepulsar/pulsar-manager:latest
+    ports:
+      - '9527:9527'
+      - '7750:7750'
+    depends_on:
+      - pulsar
+    links:
+      - pulsar
+    environment:
+      SPRING_CONFIGURATION_FILE: /pulsar-manager/pulsar-manager/application.properties

@@ -21,7 +21,13 @@ import { HealthModule } from './health/health.module';
       isGlobal: true,
       cache: true,
     }),
-    LoggerModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: false,
+        quietReqLogger: false,
+        quietResLogger: false,
+      },
+    }),
     AuthDbModule,
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,

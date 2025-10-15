@@ -17,6 +17,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@jobber/apache-pulsar": ["libs/apache-pulsar/src/index.ts"],
       "@jobber/auth-api": ["libs/auth-api/src/index.ts"],
       "@jobber/auth-db": ["libs/auth-db/src/index.ts"],
       "@jobber/auth-service": ["libs/auth-service/src/index.ts"],
