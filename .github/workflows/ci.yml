@@ -318,6 +318,7 @@ jobs:
       #     DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
       #     PORT: 3000
       #     BASE_URL: http://localhost:3000
+      #     NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
 
       - name: Stop auth service
         if: always()
@@ -426,6 +427,8 @@ jobs:
       #     DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
       #     PORT: 3001
       #     AUTH_BASE_URL: http://localhost:3000
+      #     PULSAR_SERVICE_URLS: pulsar://localhost:6650
+      #     NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
 
       - name: Stop services
         if: always()
