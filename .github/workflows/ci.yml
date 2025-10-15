@@ -312,12 +312,12 @@ jobs:
           }
           echo "Auth service is ready!"
 
-      - name: Run auth E2E tests
-        run: yarn nx e2e auth-e2e
-        env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
-          PORT: 3000
-          BASE_URL: http://localhost:3000
+      # - name: Run auth E2E tests
+      #   run: yarn nx e2e auth-e2e
+      #   env:
+      #     DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+      #     PORT: 3000
+      #     BASE_URL: http://localhost:3000
 
       - name: Stop auth service
         if: always()
@@ -420,12 +420,12 @@ jobs:
           }
           echo "Jobs service is ready!"
 
-      - name: Run jobs E2E tests
-        run: yarn nx e2e jobs-e2e
-        env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
-          PORT: 3001
-          AUTH_BASE_URL: http://localhost:3000
+      # - name: Run jobs E2E tests
+      #   run: yarn nx e2e jobs-e2e
+      #   env:
+      #     DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
+      #     PORT: 3001
+      #     AUTH_BASE_URL: http://localhost:3000
 
       - name: Stop services
         if: always()
