@@ -20,7 +20,9 @@ export class JobsService implements OnModuleInit {
       );
   }
 
-  findJobByName = (jobName: string): DiscoveredClassWithMeta<JobsMetaData> | undefined => {
+  findJobByName = (
+    jobName: string
+  ): DiscoveredClassWithMeta<JobsMetaData> | undefined => {
     return this.jobs.find(
       (job) => job.meta.name.toLowerCase() === jobName?.toLowerCase()
     );
@@ -46,7 +48,7 @@ export class JobsService implements OnModuleInit {
 
   async executeJob(jobName: string): Promise<JobsMetaData> {
     const job = this.findOrFailJobByName(jobName);
-    await (job.discoveredClass.instance as AbstractJob).execute();
+    await (job.discoveredClass.instance as AbstractJob).execute({}, jobName);
     return job.meta;
   }
 }
