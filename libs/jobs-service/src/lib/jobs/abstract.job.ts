@@ -18,6 +18,8 @@ export abstract class AbstractJob implements OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.producer.close();
+    if (this.producer) {
+      await this.producer.close();
+    }
   }
 }
