@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma-clients/auth-db';
 
 @Injectable()
 export class AuthDbService extends PrismaClient implements OnModuleInit {
-    async onModuleInit() {
+    async onModuleInit(): Promise<void> {
         await this.$connect();
     }
 }

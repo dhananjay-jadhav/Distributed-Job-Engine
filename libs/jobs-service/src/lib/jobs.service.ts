@@ -13,14 +13,14 @@ export class JobsService implements OnModuleInit {
 
   constructor(private readonly discoveryService: DiscoveryService) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     this.jobs =
       await this.discoveryService.providersWithMetaAtKey<JobsMetaData>(
         JOBS_METADATA_KEY
       );
   }
 
-  findJobByName = (jobName: string) => {
+  findJobByName = (jobName: string): DiscoveredClassWithMeta<JobsMetaData> | undefined => {
     return this.jobs.find(
       (job) => job.meta.name.toLowerCase() === jobName?.toLowerCase()
     );

@@ -1,5 +1,5 @@
 export abstract class AbstractJob {
-  execute() {
+  execute(): void {
     console.log(`Executing the Job.....`);
   }
 }

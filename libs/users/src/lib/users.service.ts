@@ -7,7 +7,7 @@ import { hash } from 'bcrypt';
 export class UserService {
   constructor(private readonly authDbService: AuthDbService) {}
 
-  async createUser(user: Prisma.UserCreateInput) {
+  async createUser(user: Prisma.UserCreateInput): Promise<Prisma.UserGetPayload<object>> {
     return this.authDbService.user.create({
       data: {
         ...user,
@@ -16,7 +16,7 @@ export class UserService {
     });
   }
 
-  async getUserbyId(userId: string) {
+  async getUserbyId(userId: string): Promise<{ id: string; email: string } | null> {
     return this.authDbService.user.findFirst({
       where: {
         id: userId,
@@ -28,7 +28,7 @@ export class UserService {
     });
   }
 
-  async getUser(userInput: Prisma.UserWhereUniqueInput) {
+  async getUser(userInput: Prisma.UserWhereUniqueInput): Promise<Prisma.UserGetPayload<object>> {
     return this.authDbService.user.findUniqueOrThrow({
       where: {
         ...userInput,

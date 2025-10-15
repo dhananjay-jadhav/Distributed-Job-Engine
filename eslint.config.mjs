@@ -37,6 +37,7 @@ export default [
     // Override or add rules here
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'error',
     },
   },
 ];
