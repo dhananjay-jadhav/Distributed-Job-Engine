@@ -4,6 +4,7 @@ import { UserService } from '@jobber/users';
 import { AuthDbService } from '@jobber/auth-db';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { LoggerModule } from 'nestjs-pino';
 
 describe('UsersResolver', () => {
   let resolver: UsersResolver;
@@ -20,6 +21,11 @@ describe('UsersResolver', () => {
         JwtModule.register({
           secret: 'test-secret',
           signOptions: { expiresIn: '1h' },
+        }),
+        LoggerModule.forRoot({
+          pinoHttp: {
+            autoLogging: false,
+          },
         }),
       ],
       providers: [UsersResolver, UserService, AuthDbService],
