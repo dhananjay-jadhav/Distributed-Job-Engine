@@ -242,6 +242,7 @@ This will create the default admin user for Pulsar Manager.
   - **URL**: http://localhost:9527
   - **Username**: admin
   - **Password**: apachepulsar
+  - For troubleshooting, see [Pulsar Manager Setup Guide](PULSAR_MANAGER_SETUP.md)
 
 6. Run database migrations:
 
