@@ -26,3 +26,15 @@ services:
       - pulsar
     environment:
       SPRING_CONFIGURATION_FILE: /pulsar-manager/pulsar-manager/application.properties
+      PULSAR_MANAGER_OPTS: "-Dspring.datasource.initialization-mode=always"
+    command: >
+      sh -c "bin/pulsar-manager --redirect.host=http://localhost --redirect.port=9527 &
+      sleep 10 &&
+      CSRF_TOKEN=$$(curl -s http://localhost:7750/pulsar-manager/csrf-token) &&
+      curl -s -H 'X-XSRF-TOKEN: '$$CSRF_TOKEN \
+           -H 'Cookie: XSRF-TOKEN='$$CSRF_TOKEN \
+           -H 'Content-Type: application/json' \
+           -X PUT http://localhost:7750/pulsar-manager/users/superuser \
+           -d '{\"name\":\"admin\",\"password\":\"apachepulsar\",\"description\":\"Default admin user\",\"email\":\"admin@pulsar.apache.org\"}' &&
+      echo 'Created default admin user - Username: admin, Password: apachepulsar' &&
+      tail -f /dev/null"
