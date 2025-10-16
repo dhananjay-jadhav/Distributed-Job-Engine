@@ -227,6 +227,14 @@ NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
 docker-compose up -d
 ```
 
+5. Setup Pulsar Manager admin user:
+
+```bash
+./setup-pulsar-manager.sh
+```
+
+This will create the default admin user for Pulsar Manager.
+
 **Services started:**
 - PostgreSQL (port 5432) - Database for authentication
 - Apache Pulsar (port 6650) - Message broker
@@ -235,7 +243,7 @@ docker-compose up -d
   - **Username**: admin
   - **Password**: apachepulsar
 
-5. Run database migrations:
+6. Run database migrations:
 
 ```bash
 yarn auth-migrate
