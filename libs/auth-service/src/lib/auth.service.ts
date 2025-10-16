@@ -6,17 +6,22 @@ import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma-clients/auth-db';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    @InjectPinoLogger(AuthService.name)
+    private readonly logger: PinoLogger
   ) {}
 
   async login(loginInput: LoginInput, res: Response): Promise<{ id: string; email: string }> {
     const { email, password } = loginInput;
+    this.logger.info({ email }, 'Login attempt');
+    
     const user = await this.verifyUser(email, password);
     const expires = new Date();
     expires.setMilliseconds(
@@ -35,6 +40,8 @@ export class AuthService {
       // sameSite: 'lax', // or 'strict'
       expires,
     });
+    
+    this.logger.info({ userId: user.id, email: user.email }, 'Login successful');
     return {
       id: user.id,
       email: user.email,
@@ -43,16 +50,20 @@ export class AuthService {
 
   async verifyUser(email: string, password: string): Promise<Prisma.UserGetPayload<object>> {
     try {
+      this.logger.debug({ email }, 'Verifying user credentials');
       const user = await this.userService.getUser({
         email,
       });
       const authenticated = await compare(password, user.password);
 
       if (!authenticated) {
+        this.logger.warn({ email }, 'Invalid password provided');
         throw new UnauthorizedException();
       }
+      this.logger.debug({ email }, 'User credentials verified successfully');
       return user;
-    } catch {
+    } catch (error) {
+      this.logger.error({ email, error }, 'User verification failed');
       throw new UnauthorizedException('User credentials are not valid!!');
     }
   }

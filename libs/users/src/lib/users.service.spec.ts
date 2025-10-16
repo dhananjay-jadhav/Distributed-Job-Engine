@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './users.service';
 import { AuthDbService } from '@jobber/auth-db';
+import { LoggerModule } from 'nestjs-pino';
 
 describe('UserService', () => {
   let service: UserService;
@@ -8,6 +9,13 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        LoggerModule.forRoot({
+          pinoHttp: {
+            autoLogging: false,
+          },
+        }),
+      ],
       providers: [UserService, AuthDbService],
     }).compile();
 
