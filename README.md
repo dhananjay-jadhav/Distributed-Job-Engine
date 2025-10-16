@@ -221,13 +221,30 @@ NEW_RELIC_LICENSE_KEY=your_license_key
 NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
 ```
 
-4. Start PostgreSQL (using Docker Compose):
+4. Start PostgreSQL and Pulsar (using Docker Compose):
 
 ```bash
 docker-compose up -d
 ```
 
-5. Run database migrations:
+5. Setup Pulsar Manager admin user:
+
+```bash
+./setup-pulsar-manager.sh
+```
+
+This will create the default admin user for Pulsar Manager.
+
+**Services started:**
+- PostgreSQL (port 5432) - Database for authentication
+- Apache Pulsar (port 6650) - Message broker
+- Pulsar Manager (ports 9527, 7750) - Web UI for Pulsar management
+  - **URL**: http://localhost:9527
+  - **Username**: admin
+  - **Password**: apachepulsar
+  - For troubleshooting, see [Pulsar Manager Setup Guide](PULSAR_MANAGER_SETUP.md)
+
+6. Run database migrations:
 
 ```bash
 yarn auth-migrate
