@@ -68,9 +68,9 @@ EOF
 echo "📝 Temporary config created at: $TEMP_CONFIG"
 echo ""
 
-# Compose the supergraph schema
+# Compose the supergraph schema with ELv2 license acceptance
 echo "🔧 Running rover supergraph compose..."
-if rover supergraph compose --config "$TEMP_CONFIG" > "$OUTPUT_FILE"; then
+if rover supergraph compose --config "$TEMP_CONFIG" --elv2-license accept > "$OUTPUT_FILE"; then
     echo ""
     echo "✅ Supergraph schema successfully composed!"
     echo "📍 Output: $OUTPUT_FILE"
