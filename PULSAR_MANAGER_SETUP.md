@@ -16,7 +16,7 @@ This guide explains how to set up and access Apache Pulsar Manager for the Distr
    - Username: `admin`
    - Password: `apachepulsar`
 
-> **Note**: If automatic setup fails, you can manually create the admin user by running `./setup-pulsar-manager.sh`
+> **Note**: If automatic setup fails, you can manually create the admin user using the commands in the [Manual Setup](#manual-setup-alternative-method) section below.
 
 ## What is Pulsar Manager?
 
@@ -34,16 +34,13 @@ Pulsar Manager is a web-based GUI management tool that helps administrators and 
 
 **Problem:** You're unable to login even with the correct credentials.
 
-**Solution:** The admin user needs to be created first. Run:
+**Solution:** The admin user should be created automatically when you run `docker-compose up -d`. Check the logs of the `pulsar-manager-init` container:
+
 ```bash
-./setup-pulsar-manager.sh
+docker-compose logs pulsar-manager-init
 ```
 
-This script will:
-1. Wait for Pulsar Manager to be ready
-2. Get a CSRF token
-3. Create the default admin user
-4. Display the login credentials
+If the automatic setup failed, you can manually create the admin user using the commands in the [Manual Setup](#manual-setup-alternative-method) section below.
 
 ### Pulsar Manager not starting
 
@@ -75,15 +72,16 @@ If you need to reset the admin user or create a new one, you can:
    docker volume prune
    ```
 
-3. Restart and run setup again:
+3. Restart services:
    ```bash
    docker-compose up -d
-   ./setup-pulsar-manager.sh
    ```
+
+   The admin user will be created automatically by the `pulsar-manager-init` service.
 
 ## Manual Setup (Alternative Method)
 
-If the script doesn't work, you can create the admin user manually:
+If the automatic setup doesn't work, you can create the admin user manually:
 
 1. Get CSRF token:
    ```bash
@@ -101,10 +99,10 @@ If the script doesn't work, you can create the admin user manually:
 
 ## Customizing Credentials
 
-To use custom credentials instead of the defaults:
+To use custom credentials instead of the defaults, you need to modify the `docker-compose.yaml` file:
 
-1. Edit the `setup-pulsar-manager.sh` script
-2. Modify the JSON payload in the curl command:
+1. Open `docker-compose.yaml` and find the `pulsar-manager-init` service
+2. Modify the JSON payload in the curl command (around line 53):
    ```json
    {
      "name": "your-username",

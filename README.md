@@ -254,8 +254,6 @@ The Pulsar Manager admin user will be created automatically when the containers 
   - **Password**: apachepulsar
   - For troubleshooting, see [Pulsar Manager Setup Guide](PULSAR_MANAGER_SETUP.md)
 
-> **Note**: If you need to manually create the admin user (e.g., if automatic setup fails), you can run `./setup-pulsar-manager.sh`
-
 5. Run database migrations:
 
 ```bash
