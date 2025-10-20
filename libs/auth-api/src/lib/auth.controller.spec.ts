@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from '@jobber/users';
 import { UserService } from '@jobber/users';
 import { AuthDbService } from '@jobber/auth-db';
+import { LoggerModule } from 'nestjs-pino';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -11,7 +12,14 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UsersModule],
+      imports: [
+        UsersModule,
+        LoggerModule.forRoot({
+          pinoHttp: {
+            autoLogging: false,
+          },
+        }),
+      ],
       controllers: [AuthController],
     }).compile();
 

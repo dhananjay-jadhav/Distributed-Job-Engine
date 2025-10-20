@@ -46,14 +46,14 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 ┌────┴─────────┐   ┌────┴──────────┐
 │ Auth Service │   │  Jobs Service │
 │  (Business)  │   │   (Business)  │
-└────┬─────────┘   └───────────────┘
-     │
-     │ Prisma ORM
-     │
-┌────┴──────────┐
-│  PostgreSQL   │
-│   Database    │
-└───────────────┘
+└────┬─────────┘   └───────┬───────┘
+     │                      │
+     │ Prisma ORM           │ Event Publishing
+     │                      │
+┌────┴──────────┐      ┌────┴──────────┐
+│  PostgreSQL   │      │ Apache Pulsar │
+│   Database    │      │ Message Broker│
+└───────────────┘      └───────────────┘
 
 ┌─────────────────────────────────────────┐
 │         Supporting Services             │
@@ -61,6 +61,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 │  • Pino Logger (Structured Logging)     │
 │  • New Relic (APM & Monitoring)         │
 │  • JWT Auth (Passport Strategy)         │
+│  • Apache Pulsar (Event Streaming)      │
 └─────────────────────────────────────────┘
 ```
 
@@ -119,6 +120,14 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
     │              │                      │                    │
     │              │                      │   Execute Job ────▶│
     │              │                      │                    │
+    │              │                      │                    │ Publish Event
+    │              │                      │                    │────────────┐
+    │              │                      │                    │            │
+    │              │                      │                    │            ▼
+    │              │                      │                    │    ┌──────────────┐
+    │              │                      │                    │    │Apache Pulsar │
+    │              │                      │                    │    │   Topic      │
+    │              │                      │                    │    └──────────────┘
     │◀─────────────│◀─────────────────────│◀───────────────────│
     │  Job Result  │                      │                    │
 ```
@@ -127,7 +136,8 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 1. Client sends executeJob mutation with job name and JWT token
 2. Jobs service validates JWT via gRPC call to Auth service
 3. Jobs discovery system finds the job by name using metadata
-4. Job is executed and result is returned to client
+4. Job is executed and publishes event to Apache Pulsar topic
+5. Job result is returned to client
 
 ### 4️⃣ List Jobs Flow
 ```
@@ -155,10 +165,11 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 - **Microservices Architecture**: Built using NestJS with Nx monorepo for scalable microservices
 - **Authentication System**: JWT-based authentication with GraphQL Federation and gRPC
 - **Job Processing Engine**: Dynamic job discovery and execution system with metadata-driven architecture
+- **Event-Driven Architecture**: Apache Pulsar integration for reliable event streaming and message publishing
 - **GraphQL Federation**: Apollo Federation v2 for distributed GraphQL architecture
 - **Database Management**: PostgreSQL with Prisma ORM for type-safe database access
 - **Observability**: Integrated logging with Pino and monitoring with New Relic
-- **Modern Stack**: TypeScript, NestJS, GraphQL, gRPC, Prisma
+- **Modern Stack**: TypeScript, NestJS, GraphQL, gRPC, Prisma, Apache Pulsar
 
 ## 🛠️ Technologies
 
@@ -169,6 +180,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 - **Database**: PostgreSQL
 - **ORM**: Prisma
 - **Communication**: gRPC with Protocol Buffers
+- **Message Broker**: Apache Pulsar
 - **Logging**: Pino (nestjs-pino)
 - **Monitoring**: New Relic
 - **Language**: TypeScript
@@ -181,6 +193,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 - Yarn package manager (v4.10.3 or later)
 - Docker and Docker Compose
 - PostgreSQL (or use Docker Compose setup)
+- Apache Pulsar (or use Docker Compose setup)
 - Kubernetes cluster (optional, for production deployment)
 - AWS Account (optional, for cloud deployment)
 
@@ -211,6 +224,9 @@ USER_PORT=3000
 JOBS_PORT=3001
 AUTH_JWT_SECRET=your_jwt_secret
 AUTH_JWT_EXPIRES_IN=300
+
+# Apache Pulsar configuration
+PULSAR_SERVICE_URLS=pulsar://localhost:6650
 
 # Optional: New Relic configuration
 NEW_RELIC_AI_MONITORING_ENABLED=true
@@ -351,6 +367,7 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 │   ├── jobs/                # Jobs service (GraphQL)
 │   └── jobs-e2e/            # E2E tests for jobs service
 ├── libs/
+│   ├── apache-pulsar/       # Apache Pulsar client integration
 │   ├── auth-api/            # Authentication GraphQL API (resolvers)
 │   ├── auth-db/             # Database module with Prisma
 │   ├── auth-service/        # Authentication business logic and guards
@@ -360,7 +377,7 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 │   ├── proto/               # Protocol Buffers definitions for gRPC
 │   ├── users/               # Users business logic
 │   └── users-api/           # Users GraphQL API (resolvers)
-├── docker-compose.yaml      # PostgreSQL setup
+├── docker-compose.yaml      # PostgreSQL and Apache Pulsar setup
 └── README.md
 ```
 
@@ -392,6 +409,60 @@ GraphQL endpoint: `http://localhost:3001/api/graphql`
 Both services provide an Apollo Sandbox interface for testing queries. Access them at:
 - Auth: `http://localhost:3000/api/graphql`
 - Jobs: `http://localhost:3001/api/graphql`
+
+## 📮 Apache Pulsar Integration
+
+The project integrates Apache Pulsar for event-driven architecture and message streaming.
+
+### Purpose
+
+Apache Pulsar is used to publish job execution events, enabling:
+- **Asynchronous Processing**: Decouple job execution from event handling
+- **Event Streaming**: Stream job execution results to downstream consumers
+- **Scalability**: Handle high-throughput event publishing with Pulsar's distributed architecture
+- **Reliability**: Guaranteed message delivery with Pulsar's persistent storage
+
+### Architecture
+
+All jobs extend `AbstractJob` which provides built-in Pulsar integration:
+
+```typescript
+@Jobs({
+  name: 'Fibonacci',
+  description: 'Generate a Fibonacci sequence and store it in DB',
+})
+export class FibonacciJob extends AbstractJob {
+  constructor(pulsarProducerClient: PulsarProducerClient) {
+    super(pulsarProducerClient);
+  }
+}
+```
+
+When a job executes, it automatically publishes events to a specified Pulsar topic.
+
+### Configuration
+
+Configure Pulsar connection in your `.env` file:
+
+```bash
+PULSAR_SERVICE_URLS=pulsar://localhost:6650
+```
+
+### Pulsar Manager Dashboard
+
+Access the Pulsar Manager dashboard to monitor topics, messages, and cluster health:
+- URL: `http://localhost:9527`
+- Dashboard provides visibility into message flows, throughput, and consumer groups
+
+### Docker Setup
+
+The `docker-compose.yaml` includes:
+- **Pulsar Broker**: Standalone mode on port 6650
+- **Pulsar Manager**: Web UI for cluster management on port 9527
+
+```bash
+docker-compose up -d pulsar
+```
 
 ## 🤝 Contributing
 
