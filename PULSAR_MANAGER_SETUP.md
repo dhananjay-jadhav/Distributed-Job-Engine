@@ -9,15 +9,14 @@ This guide explains how to set up and access Apache Pulsar Manager for the Distr
    docker-compose up -d
    ```
 
-2. **Create Pulsar Manager admin user:**
-   ```bash
-   ./setup-pulsar-manager.sh
-   ```
+   The Pulsar Manager admin user is created automatically when the containers start.
 
-3. **Access Pulsar Manager:**
+2. **Access Pulsar Manager:**
    - URL: http://localhost:9527
    - Username: `admin`
    - Password: `apachepulsar`
+
+> **Note**: If automatic setup fails, you can manually create the admin user by running `./setup-pulsar-manager.sh`
 
 ## What is Pulsar Manager?
 
