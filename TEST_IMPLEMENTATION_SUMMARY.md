@@ -50,16 +50,16 @@ All unit tests have been enhanced to use a real PostgreSQL database:
 - Tests JWT token generation
 - Tests cookie setting
 
-#### Auth Resolver (`apps/auth-api/src/api/auth.resolver.spec.ts`)
+#### Auth Resolver (`apps/auth-api/src/auth/auth.resolver.spec.ts`)
 - Tests GraphQL login mutation
 - Creates real users for testing
 - Tests authentication flow
 
-#### Auth Controller (`apps/auth-api/src/api/auth.controller.spec.ts`)
+#### Auth Controller (`apps/auth-api/src/auth/auth.controller.spec.ts`)
 - Tests gRPC authentication endpoint
 - Tests user lookup by JWT payload
 
-#### Users Resolver (`apps/auth-api/src/api/users.resolver.spec.ts`)
+#### Users Resolver (`apps/auth-api/src/users/users.resolver.spec.ts`)
 - Tests user creation mutation
 - Tests user query by ID
 - Tests authentication guard behavior

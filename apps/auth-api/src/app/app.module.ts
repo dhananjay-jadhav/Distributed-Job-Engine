@@ -7,9 +7,9 @@ import {
 } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
-import { UsersApiModule } from '../api/users-api.module';
+import { UsersApiModule } from '../users/users-api.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthApiModule } from '../api/auth-api.module';
+import { AuthApiModule } from '../auth/auth-api.module';
 import { LoggerModule } from 'nestjs-pino';
 import createPlugin = require('@newrelic/apollo-server-plugin');
 import { ApolloServerPlugin } from '@apollo/server';

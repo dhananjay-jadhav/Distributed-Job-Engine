@@ -355,7 +355,8 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 .
 ├── apps/
 │   ├── auth-api/            # Authentication service (GraphQL + gRPC)
-│   │   └── src/api/        # Auth & Users resolvers and controllers
+│   │   ├── src/auth/       # Auth resolvers and controllers
+│   │   └── src/users/      # Users resolvers
 │   ├── auth-api-e2e/       # E2E tests for auth service
 │   ├── jobs-api/           # Jobs service (GraphQL)
 │   │   └── src/api/        # Jobs resolvers
