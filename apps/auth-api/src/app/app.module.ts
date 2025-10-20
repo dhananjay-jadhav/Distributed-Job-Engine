@@ -1,0 +1,54 @@
+import { Module } from '@nestjs/common';
+import { AuthDbModule } from '@jobber/auth-db';
+import { GraphQLModule } from '@nestjs/graphql';
+import {
+  ApolloFederationDriver,
+  ApolloFederationDriverConfig,
+} from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { join } from 'path';
+import { UsersApiModule } from '../api/users-api.module';
+import { ConfigModule } from '@nestjs/config';
+import { AuthApiModule } from '../api/auth-api.module';
+import { LoggerModule } from 'nestjs-pino';
+import createPlugin = require('@newrelic/apollo-server-plugin');
+import { ApolloServerPlugin } from '@apollo/server';
+import { HealthModule } from './health/health.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: false,
+        quietReqLogger: false,
+        quietResLogger: false,
+      },
+    }),
+    AuthDbModule,
+    GraphQLModule.forRoot<ApolloFederationDriverConfig>({
+      driver: ApolloFederationDriver,
+      path: 'api/graphql',
+      autoSchemaFile: {
+        path: join(process.cwd(), 'apps/auth-api/src/schema.gql'),
+        federation: 2,
+      },
+      sortSchema: true,
+      playground: false,
+      context: ({ req, res }) => ({ req, res }),
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+        createPlugin<ApolloServerPlugin>({}),
+      ],
+    }),
+    UsersApiModule,
+    AuthApiModule,
+    HealthModule,
+  ],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}
