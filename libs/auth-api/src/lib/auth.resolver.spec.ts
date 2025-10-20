@@ -8,6 +8,7 @@ import { UserService } from '@jobber/users';
 import { AuthDbService } from '@jobber/auth-db';
 import { Response } from 'express';
 import * as Express from 'express';
+import { LoggerModule } from 'nestjs-pino';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
@@ -25,6 +26,11 @@ describe('AuthResolver', () => {
         ConfigModule.forRoot({
           envFilePath: '.env',
           isGlobal: true,
+        }),
+        LoggerModule.forRoot({
+          pinoHttp: {
+            autoLogging: false,
+          },
         }),
         AuthServiceModule,
       ],

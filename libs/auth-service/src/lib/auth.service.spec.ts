@@ -7,6 +7,7 @@ import { UserService } from '@jobber/users';
 import { AuthDbService } from '@jobber/auth-db';
 import { Response } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
+import { LoggerModule } from 'nestjs-pino';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -23,6 +24,11 @@ describe('AuthService', () => {
         JwtModule.register({
           secret: 'test-secret',
           signOptions: { expiresIn: '1h' },
+        }),
+        LoggerModule.forRoot({
+          pinoHttp: {
+            autoLogging: false,
+          },
         }),
         UsersModule,
       ],

@@ -4,6 +4,7 @@ import { DiscoveryModule } from '@golevelup/nestjs-discovery';
 import { FibonacciJob } from './jobs/fibonacci.job';
 import { ConfigModule } from '@nestjs/config';
 import { ApachePulsarModule } from '@jobber/apache-pulsar';
+import { LoggerModule } from 'nestjs-pino';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -14,6 +15,11 @@ describe('JobsService', () => {
         ConfigModule.forRoot({
           isGlobal: true,
           cache: true,
+        }),
+        LoggerModule.forRoot({
+          pinoHttp: {
+            autoLogging: false,
+          },
         }),
         ApachePulsarModule,
         DiscoveryModule,

@@ -1,25 +1,42 @@
 import { PulsarProducerClient } from '@jobber/apache-pulsar';
 import { OnModuleDestroy } from '@nestjs/common';
 import { Producer } from 'pulsar-client';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export abstract class AbstractJob implements OnModuleDestroy {
   private producer!: Producer;
 
+  @InjectPinoLogger()
+  protected readonly logger!: PinoLogger;
+
   constructor(private readonly pulsarProducerClient: PulsarProducerClient) {}
 
   async execute(data: object, topicName: string): Promise<void> {
-    if (!this.producer) {
-      this.producer = await this.pulsarProducerClient.createProducer(topicName);
+    this.logger.info({ topicName, data }, 'Executing job and publishing to Apache Pulsar');
+    try {
+      if (!this.producer) {
+        this.logger.debug({ topicName }, 'Creating new Pulsar producer');
+        this.producer = await this.pulsarProducerClient.createProducer(topicName);
+      }
+      await this.producer.send({
+        data: Buffer.from(JSON.stringify(data)),
+      });
+      this.logger.info({ topicName }, 'Event published to Apache Pulsar successfully');
+    } catch (error) {
+      this.logger.error({ topicName, data, error }, 'Failed to publish event to Apache Pulsar');
+      throw error;
     }
-    await this.producer.send({
-      data: Buffer.from(JSON.stringify(data)),
-    });
-    console.log('Published event to the Apache pulsar....!!!');
   }
 
   async onModuleDestroy(): Promise<void> {
     if (this.producer) {
-      await this.producer.close();
+      this.logger.info('Closing Pulsar producer');
+      try {
+        await this.producer.close();
+        this.logger.info('Pulsar producer closed successfully');
+      } catch (error) {
+        this.logger.error({ error }, 'Failed to close Pulsar producer');
+      }
     }
   }
 }
