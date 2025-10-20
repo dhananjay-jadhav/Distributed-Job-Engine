@@ -261,14 +261,14 @@ yarn auth-migrate
 1. Start the authentication service:
 
 ```bash
-yarn nx serve auth
+yarn nx serve auth-api
 # Runs on http://localhost:3000/api
 ```
 
 2. Start the jobs service:
 
 ```bash
-yarn nx serve jobs
+yarn nx serve jobs-api
 # Runs on http://localhost:3001/api
 ```
 
@@ -277,8 +277,8 @@ yarn nx serve jobs
 Build all applications:
 
 ```bash
-yarn nx build auth
-yarn nx build jobs
+yarn nx build auth-api
+yarn nx build jobs-api
 ```
 
 ### Testing
@@ -307,7 +307,7 @@ yarn all:lint
 Lint a specific project:
 
 ```bash
-yarn nx lint auth
+yarn nx lint auth-api
 ```
 
 ### Code Formatting
@@ -354,22 +354,21 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 ```
 .
 ├── apps/
-│   ├── auth/                 # Authentication service (GraphQL + gRPC)
-│   ├── auth-e2e/            # E2E tests for auth service
-│   ├── jobs/                # Jobs service (GraphQL)
-│   └── jobs-e2e/            # E2E tests for jobs service
+│   ├── auth-api/            # Authentication service (GraphQL + gRPC)
+│   │   └── src/api/        # Auth & Users resolvers and controllers
+│   ├── auth-api-e2e/       # E2E tests for auth service
+│   ├── jobs-api/           # Jobs service (GraphQL)
+│   │   └── src/api/        # Jobs resolvers
+│   └── jobs-api-e2e/       # E2E tests for jobs service
 ├── libs/
-│   ├── apache-pulsar/       # Apache Pulsar client integration
-│   ├── auth-api/            # Authentication GraphQL API (resolvers)
-│   ├── auth-db/             # Database module with Prisma
-│   ├── auth-service/        # Authentication business logic and guards
-│   ├── common-utils/        # Shared utilities, types, and DTOs
-│   ├── jobs-api/            # Jobs GraphQL API (resolvers)
-│   ├── jobs-service/        # Jobs execution engine and discovery
-│   ├── proto/               # Protocol Buffers definitions for gRPC
-│   ├── users/               # Users business logic
-│   └── users-api/           # Users GraphQL API (resolvers)
-├── docker-compose.yaml      # PostgreSQL and Apache Pulsar setup
+│   ├── apache-pulsar/      # Apache Pulsar client integration
+│   ├── auth-db/            # Database module with Prisma
+│   ├── auth/               # Authentication business logic and guards
+│   ├── common-utils/       # Shared utilities, types, and DTOs
+│   ├── jobs/               # Jobs execution engine and discovery
+│   ├── proto/              # Protocol Buffers definitions for gRPC
+│   └── users/              # Users business logic
+├── docker-compose.yaml     # PostgreSQL and Apache Pulsar setup
 └── README.md
 ```
 
