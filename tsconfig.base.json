@@ -18,15 +18,12 @@
     "baseUrl": ".",
     "paths": {
       "@jobber/apache-pulsar": ["libs/apache-pulsar/src/index.ts"],
-      "@jobber/auth-api": ["libs/auth-api/src/index.ts"],
       "@jobber/auth-db": ["libs/auth-db/src/index.ts"],
-      "@jobber/auth-service": ["libs/auth-service/src/index.ts"],
+      "@jobber/auth": ["libs/auth/src/index.ts"],
       "@jobber/common-utils": ["libs/common-utils/src/index.ts"],
-      "@jobber/jobs-api": ["libs/jobs-api/src/index.ts"],
-      "@jobber/jobs-service": ["libs/jobs-service/src/index.ts"],
+      "@jobber/jobs": ["libs/jobs/src/index.ts"],
       "@jobber/proto": ["libs/proto/src/index.ts"],
-      "@jobber/users": ["libs/users/src/index.ts"],
-      "@jobber/users-api": ["libs/users-api/src/index.ts"]
+      "@jobber/users": ["libs/users/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

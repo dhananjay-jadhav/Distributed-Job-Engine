@@ -43,34 +43,34 @@ All unit tests have been enhanced to use a real PostgreSQL database:
 - Tests error handling for non-existent users
 - Proper cleanup of test data after each test
 
-#### Auth Service (`libs/auth-service/src/lib/auth.service.spec.ts`)
+#### Auth Service (`libs/auth/src/lib/auth.service.spec.ts`)
 - Tests login flow with valid credentials
 - Tests login flow with invalid credentials
 - Tests user verification
 - Tests JWT token generation
 - Tests cookie setting
 
-#### Auth Resolver (`libs/auth-api/src/lib/auth.resolver.spec.ts`)
+#### Auth Resolver (`apps/auth-api/src/auth/auth.resolver.spec.ts`)
 - Tests GraphQL login mutation
 - Creates real users for testing
 - Tests authentication flow
 
-#### Auth Controller (`libs/auth-api/src/lib/auth.controller.spec.ts`)
+#### Auth Controller (`apps/auth-api/src/auth/auth.controller.spec.ts`)
 - Tests gRPC authentication endpoint
 - Tests user lookup by JWT payload
 
-#### Users Resolver (`libs/users-api/src/lib/users.resolver.spec.ts`)
+#### Users Resolver (`apps/auth-api/src/users/users.resolver.spec.ts`)
 - Tests user creation mutation
 - Tests user query by ID
 - Tests authentication guard behavior
 
-#### Jobs Service (`libs/jobs-service/src/lib/jobs.service.spec.ts`)
+#### Jobs Service (`libs/jobs/src/lib/jobs.service.spec.ts`)
 - Tests job discovery and registration
 - Tests job filtering by name
 - Tests job execution
 - Tests error handling for non-existent jobs
 
-#### Jobs Resolver (`libs/jobs-api/src/lib/jobs.resolver.spec.ts`)
+#### Jobs Resolver (`apps/jobs-api/src/api/jobs.resolver.spec.ts`)
 - Tests jobs query
 - Tests job filtering
 - Tests job execution mutation
@@ -119,17 +119,17 @@ A comprehensive testing guide that includes:
 #### Unit/Integration Tests:
 - ✅ auth-db: 3 tests
 - ✅ users: 6 tests
-- ✅ auth-service: 6 tests
+- ✅ auth: 6 tests (business logic)
 - ✅ auth-api (resolver): 2 tests
 - ✅ auth-api (controller): 3 tests
-- ✅ users-api: 4 tests
-- ✅ jobs-service: 6 tests
-- ✅ jobs-api: 5 tests
+- ✅ users-api (resolver): 4 tests
+- ✅ jobs: 6 tests (business logic)
+- ✅ jobs-api (resolver): 5 tests
 - ✅ common-utils: 1 test
 
 #### E2E Tests:
-- ✅ auth-e2e: 6 test scenarios
-- ✅ jobs-e2e: 6 test scenarios
+- ✅ auth-api-e2e: 6 test scenarios
+- ✅ jobs-api-e2e: 6 test scenarios
 
 ## Key Features
 
@@ -177,8 +177,8 @@ yarn nx run-many -t test
 ```bash
 yarn nx test auth-db
 yarn nx test users
-yarn nx test auth-service
-yarn nx test jobs-service
+yarn nx test auth
+yarn nx test jobs
 ```
 
 ### 3. E2E Tests

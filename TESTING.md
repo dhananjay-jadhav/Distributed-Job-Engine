@@ -52,11 +52,8 @@ Run tests for a specific project:
 ```bash
 yarn nx test auth-db
 yarn nx test users
-yarn nx test auth-service
-yarn nx test auth-api
-yarn nx test users-api
-yarn nx test jobs-service
-yarn nx test jobs-api
+yarn nx test auth
+yarn nx test jobs
 ```
 
 ### 4. Run E2E Tests
@@ -67,29 +64,29 @@ E2E tests require the services to be running.
 
 Terminal 1 - Start the auth service:
 ```bash
-yarn nx serve auth
+yarn nx serve auth-api
 ```
 
 Terminal 2 - Run the e2e tests:
 ```bash
-PORT=3000 yarn nx e2e auth-e2e
+PORT=3000 yarn nx e2e auth-api-e2e
 ```
 
 #### For Jobs Service E2E Tests:
 
 Terminal 1 - Start the auth service (needed for authentication):
 ```bash
-yarn nx serve auth
+yarn nx serve auth-api
 ```
 
 Terminal 2 - Start the jobs service:
 ```bash
-yarn nx serve jobs
+yarn nx serve jobs-api
 ```
 
 Terminal 3 - Run the e2e tests:
 ```bash
-PORT=3001 AUTH_BASE_URL=http://localhost:3000 yarn nx e2e jobs-e2e
+PORT=3001 AUTH_BASE_URL=http://localhost:3000 yarn nx e2e jobs-api-e2e
 ```
 
 ### 5. Clean Up
@@ -217,8 +214,8 @@ Example:
 ### E2E Tests
 
 E2E tests are located in separate apps:
-- `apps/auth-e2e/src/auth/auth.spec.ts` - Auth service E2E tests
-- `apps/jobs-e2e/src/jobs/jobs.spec.ts` - Jobs service E2E tests
+- `apps/auth-api-e2e/src/auth/auth.spec.ts` - Auth service E2E tests
+- `apps/jobs-api-e2e/src/jobs/jobs.spec.ts` - Jobs service E2E tests
 
 ## Test Philosophy
 

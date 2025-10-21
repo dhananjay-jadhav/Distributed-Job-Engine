@@ -120,10 +120,10 @@ jobs:
         project: ${{ fromJson(needs.setup.outputs.test-projects) }}
         exclude:
           # Exclude E2E and app projects from unit tests
-          - project: auth
-          - project: jobs
-          - project: auth-e2e
-          - project: jobs-e2e
+          - project: auth-api
+          - project: jobs-api
+          - project: auth-api-e2e
+          - project: jobs-api-e2e
           - project: proto
     steps:
       - uses: actions/checkout@v4
@@ -257,24 +257,24 @@ jobs:
           path: |
             dist
             apps/*/dist
-          key: ${{ runner.os }}-build-auth-${{ github.sha }}
+          key: ${{ runner.os }}-build-auth-api-${{ github.sha }}
 
       - name: Build auth service
-        run: yarn nx build auth
+        run: yarn nx build auth-api
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
 
       - name: Check build output
         run: |
           echo "Checking build output..."
-          ls -la dist/apps/auth/
+          ls -la dist/apps/auth-api/
           echo "Contents of main files..."
-          head -20 dist/apps/auth/main.js || echo "main.js not found"
+          head -20 dist/apps/auth-api/main.js || echo "main.js not found"
 
       - name: Start auth service in background
         run: |
           echo "Starting auth service..."
-          cd dist/apps/auth
+          cd dist/apps/auth-api
           NODE_ENV=production node main.js > ../../../auth.log 2>&1 &
           echo $! > ../../../auth.pid
           echo "Auth service started with PID $(cat ../../../auth.pid)"
@@ -350,19 +350,19 @@ jobs:
           path: |
             dist
             apps/*/dist
-          key: ${{ runner.os }}-build-jobs-${{ github.sha }}
+          key: ${{ runner.os }}-build-jobs-api-${{ github.sha }}
 
       - name: Build auth and jobs services
         run: |
-          yarn nx build auth
-          yarn nx build jobs
+          yarn nx build auth-api
+          yarn nx build jobs-api
         env:
           DATABASE_URL: postgres://postgres:admin@localhost:5432/auth
 
       - name: Start auth service in background
         run: |
           echo "Starting auth service..."
-          cd dist/apps/auth
+          cd dist/apps/auth-api
           NODE_ENV=production node main.js > ../../../auth.log 2>&1 &
           echo $! > ../../../auth.pid
           echo "Auth service started with PID $(cat ../../../auth.pid)"
@@ -394,7 +394,7 @@ jobs:
       - name: Start jobs service in background
         run: |
           echo "Starting jobs service..."
-          cd dist/apps/jobs
+          cd dist/apps/jobs-api
           NODE_ENV=production node main.js > ../../../jobs.log 2>&1 &
           echo $! > ../../../jobs.pid
           echo "Jobs service started with PID $(cat ../../../jobs.pid)"
