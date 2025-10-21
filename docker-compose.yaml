@@ -26,3 +26,45 @@ services:
       - pulsar
     environment:
       SPRING_CONFIGURATION_FILE: /pulsar-manager/pulsar-manager/application.properties
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7750/pulsar-manager/csrf-token"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  pulsar-manager-init:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      dashboard:
+        condition: service_healthy
+    restart: 'no'
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      echo 'Setting up Pulsar Manager admin user...' &&
+      echo 'Pulsar Manager is ready!' &&
+      CSRF_TOKEN=$$(curl -s http://distributed-job-engine-dashboard-1:7750/pulsar-manager/csrf-token) &&
+      if [ -z \"$$CSRF_TOKEN\" ]; then
+        echo 'ERROR: Failed to get CSRF token';
+        exit 1;
+      fi &&
+      echo 'Creating admin user...' &&
+      HTTP_CODE=$$(curl -s -w '%{http_code}' -o /dev/null -H \"X-XSRF-TOKEN: $$CSRF_TOKEN\" -H \"Cookie: XSRF-TOKEN=$$CSRF_TOKEN\" -H \"Content-Type: application/json\" -X PUT http://distributed-job-engine-dashboard-1:7750/pulsar-manager/users/superuser -d '{\"name\":\"admin\",\"password\":\"apachepulsar\",\"description\":\"Default admin user\",\"email\":\"admin@pulsar.apache.org\"}') &&
+      if [ \"$$HTTP_CODE\" = '200' ] || [ \"$$HTTP_CODE\" = '204' ]; then
+        echo '✅ Success! Admin user created.' &&
+        echo '' &&
+        echo 'Pulsar Manager Login Credentials:' &&
+        echo '==================================' &&
+        echo 'URL:      http://localhost:9527' &&
+        echo 'Username: admin' &&
+        echo 'Password: apachepulsar' &&
+        echo '==================================';
+      else
+        echo \"⚠️  Warning: Received HTTP code $$HTTP_CODE\" &&
+        echo 'The admin user might already exist or there was an error.' &&
+        echo 'Try logging in with:' &&
+        echo '  Username: admin' &&
+        echo '  Password: apachepulsar';
+      fi
+      "
