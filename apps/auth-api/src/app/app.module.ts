@@ -13,7 +13,7 @@ import { AuthApiModule } from '../auth/auth-api.module';
 import { LoggerModule } from 'nestjs-pino';
 import createPlugin = require('@newrelic/apollo-server-plugin');
 import { ApolloServerPlugin } from '@apollo/server';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '../health/health.module';
 
 @Module({
   imports: [

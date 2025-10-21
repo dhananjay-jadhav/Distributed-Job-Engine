@@ -356,10 +356,12 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 ├── apps/
 │   ├── auth-api/            # Authentication service (GraphQL + gRPC)
 │   │   ├── src/auth/       # Auth resolvers and controllers
-│   │   └── src/users/      # Users resolvers
+│   │   ├── src/users/      # Users resolvers
+│   │   └── src/health/     # Health check endpoints
 │   ├── auth-api-e2e/       # E2E tests for auth service
 │   ├── jobs-api/           # Jobs service (GraphQL)
-│   │   └── src/api/        # Jobs resolvers
+│   │   ├── src/api/        # Jobs resolvers
+│   │   └── src/health/     # Health check endpoints
 │   └── jobs-api-e2e/       # E2E tests for jobs service
 ├── libs/
 │   ├── apache-pulsar/      # Apache Pulsar client integration
