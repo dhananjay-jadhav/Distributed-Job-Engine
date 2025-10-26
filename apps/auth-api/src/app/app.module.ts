@@ -24,8 +24,8 @@ import { HealthModule } from '../health/health.module';
     LoggerModule.forRoot({
       pinoHttp: {
         autoLogging: false,
-        quietReqLogger: false,
-        quietResLogger: false,
+        quietReqLogger: true,
+        quietResLogger: true,
       },
     }),
     AuthDbModule,

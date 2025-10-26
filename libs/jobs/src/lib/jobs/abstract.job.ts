@@ -18,10 +18,11 @@ export abstract class AbstractJob implements OnModuleDestroy {
         this.logger.debug({ topicName }, 'Creating new Pulsar producer');
         this.producer = await this.pulsarProducerClient.createProducer(topicName);
       }
-      await this.producer.send({
+      const messageId = await this.producer.send({
         data: Buffer.from(JSON.stringify(data)),
       });
-      this.logger.info({ topicName }, 'Event published to Apache Pulsar successfully');
+
+      this.logger.info({ topicName, messageId: messageId.toString() }, 'Event published to Apache Pulsar successfully');
     } catch (error) {
       this.logger.error({ topicName, data, error }, 'Failed to publish event to Apache Pulsar');
       throw error;
