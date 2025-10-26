@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:latest
+    container_name: postgres
     ports:
       - 5432:5432
     volumes:
@@ -11,12 +12,14 @@ services:
 
   pulsar:
     image: apachepulsar/pulsar:latest
+    container_name: pulsar
     ports:
       - 6650:6650
     command: /pulsar/bin/pulsar standalone
 
-  dashboard:
+  pulsar-manager:
     image: apachepulsar/pulsar-manager:latest
+    container_name: pulsar-manager
     ports:
       - '9527:9527'
       - '7750:7750'

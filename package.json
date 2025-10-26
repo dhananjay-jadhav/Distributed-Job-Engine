@@ -13,6 +13,7 @@
     "format": "nx format:write",
     "auth-migrate": "nx migrate-prisma auth-db",
     "prepare": "husky",
+    "local-setup": "docker-compose up -d",
     "gen:proto-types": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./libs/proto/src/types -I ./libs/proto/src/proto ./libs/proto/src/proto/*.proto --ts_proto_opt=nestJs=true"
   },
   "dependencies": {
