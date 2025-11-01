@@ -4,15 +4,17 @@
  */
 
 import 'newrelic';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ConfigService } from '@nestjs/config';
 import cookieParser = require('cookie-parser');
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  const logger = new Logger('Gateway');
+
+  const logger = app.get(Logger);
   
   app.useGlobalPipes(new ValidationPipe({}));
   app.use(cookieParser());

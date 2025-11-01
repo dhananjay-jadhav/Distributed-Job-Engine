@@ -4,6 +4,10 @@ import { ApolloGatewayDriver, ApolloGatewayDriverConfig } from '@nestjs/apollo';
 import { IntrospectAndCompose } from '@apollo/gateway';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from '../health/health.module';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import createPlugin = require('@newrelic/apollo-server-plugin');
+import { ApolloServerPlugin } from '@apollo/server';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -11,10 +15,22 @@ import { HealthModule } from '../health/health.module';
       isGlobal: true,
       cache: true,
     }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: false,
+        quietReqLogger: true,
+        quietResLogger: true,
+      },
+    }),
     GraphQLModule.forRoot<ApolloGatewayDriverConfig>({
       driver: ApolloGatewayDriver,
       server: {
         path: '/api/graphql',
+        playground: false,
+        plugins: [
+        ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+        createPlugin<ApolloServerPlugin>({}),
+      ],
       },
       gateway: {
         supergraphSdl: new IntrospectAndCompose({
@@ -29,6 +45,7 @@ import { HealthModule } from '../health/health.module';
             },
           ],
         }),
+        debug: false,
       },
     }),
     HealthModule,
@@ -37,3 +54,5 @@ import { HealthModule } from '../health/health.module';
   providers: [],
 })
 export class AppModule {}
+
+
