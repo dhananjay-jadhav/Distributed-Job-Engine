@@ -77,9 +77,9 @@ To work with the Apollo Router, you need:
 curl -sSL https://rover.apollo.dev/nix/latest | sh
 ```
 
-**Alternative (via npm):**
+**Alternative (via yarn):**
 ```bash
-npm install -g @apollo/rover
+yarn global add @apollo/rover
 ```
 
 **Verify installation:**

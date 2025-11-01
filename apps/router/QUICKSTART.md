@@ -47,9 +47,9 @@ The Rover CLI is needed to compose the supergraph schema.
 curl -sSL https://rover.apollo.dev/nix/latest | sh
 ```
 
-**Alternative (npm):**
+**Alternative (via yarn):**
 ```bash
-npm install -g @apollo/rover
+yarn global add @apollo/rover
 ```
 
 **Verify installation:**

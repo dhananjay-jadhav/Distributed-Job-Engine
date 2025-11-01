@@ -274,9 +274,9 @@ yarn auth-migrate
 curl -sSL https://rover.apollo.dev/nix/latest | sh
 ```
 
-**Alternative (via npm):**
+**Alternative (via yarn):**
 ```bash
-npm install -g @apollo/rover
+yarn global add @apollo/rover
 ```
 
 **Verify installation:**
