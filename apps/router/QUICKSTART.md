@@ -42,15 +42,17 @@ Wait for both services to start successfully. You should see messages like:
 
 The Rover CLI is needed to compose the supergraph schema.
 
-**Quick install (recommended):**
+**Recommended (via curl):**
 ```bash
 curl -sSL https://rover.apollo.dev/nix/latest | sh
 ```
 
-**Alternative (via yarn):**
+**Alternative (via npm):**
 ```bash
-yarn global add @apollo/rover
+npm install -g @apollo/rover
 ```
+
+> **Note**: Yarn 4+ doesn't support `yarn global`. Use curl (recommended) or npm for global CLI tools.
 
 **Verify installation:**
 ```bash

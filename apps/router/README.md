@@ -77,10 +77,12 @@ To work with the Apollo Router, you need:
 curl -sSL https://rover.apollo.dev/nix/latest | sh
 ```
 
-**Alternative (via yarn):**
+**Alternative (via npm):**
 ```bash
-yarn global add @apollo/rover
+npm install -g @apollo/rover
 ```
+
+> **Note**: Yarn 4+ doesn't support `yarn global`. Use curl (recommended) or npm for global CLI tools.
 
 **Verify installation:**
 ```bash

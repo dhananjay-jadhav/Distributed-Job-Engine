@@ -16,11 +16,11 @@ if ! command -v rover &> /dev/null; then
     echo "❌ Error: Rover CLI is not installed"
     echo "Please install Rover: https://www.apollographql.com/docs/rover/getting-started"
     echo ""
-    echo "Quick install with curl (recommended):"
+    echo "Recommended installation (curl):"
     echo "  curl -sSL https://rover.apollo.dev/nix/latest | sh"
     echo ""
-    echo "Or with yarn:"
-    echo "  yarn global add @apollo/rover"
+    echo "Alternative (npm):"
+    echo "  npm install -g @apollo/rover"
     exit 1
 fi
 
