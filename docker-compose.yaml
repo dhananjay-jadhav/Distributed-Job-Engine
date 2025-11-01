@@ -57,5 +57,7 @@ services:
       start_period: 10s
     extra_hosts:
       # For local development, map service names to host machine
+      # Note: 'host-gateway' works on Docker Desktop (Mac/Windows)
+      # For Linux, use 'host.docker.internal' or set up proper networking
       - "auth-api:host-gateway"
       - "jobs-api:host-gateway"

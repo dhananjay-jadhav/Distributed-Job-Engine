@@ -1,0 +1,88 @@
+supergraph:
+  # The socket address and port to listen on
+  listen: 0.0.0.0:4000
+  # IMPORTANT: Disable introspection in production for security
+  introspection: false
+
+# CORS configuration - Update with your production domains
+cors:
+  origins:
+    - https://your-production-domain.com
+    - https://your-staging-domain.com
+  allow_credentials: true
+
+# Subgraph configuration
+subgraphs:
+  auth:
+    routing_url: http://auth-api:3000/api/graphql
+    # Health check configuration
+    health_check:
+      enabled: true
+      path: /api/health
+      interval: 10s
+      timeout: 5s
+
+  jobs:
+    routing_url: http://jobs-api:3001/api/graphql
+    # Health check configuration
+    health_check:
+      enabled: true
+      path: /api/health
+      interval: 10s
+      timeout: 5s
+
+# Headers propagation - Explicitly list required headers for security
+headers:
+  # Propagate only necessary headers
+  all:
+    request:
+      - propagate:
+          # Authentication headers
+          named: "authorization"
+      - propagate:
+          named: "cookie"
+      - propagate:
+          # Request tracking
+          named: "x-request-id"
+      - propagate:
+          named: "x-forwarded-for"
+
+# Telemetry and logging
+telemetry:
+  instrumentation:
+    spans:
+      mode: spec_compliant
+  exporters:
+    logging:
+      stdout:
+        enabled: true
+        format: json
+    # Add your APM/monitoring configuration here
+    # metrics:
+    #   prometheus:
+    #     enabled: true
+    #     listen: 0.0.0.0:9090
+    #     path: /metrics
+
+# Health check endpoint for the router itself
+health_check:
+  enabled: true
+  listen: 0.0.0.0:8088
+  path: /health
+
+# Disable homepage in production
+homepage:
+  enabled: false
+
+# Rate limiting (optional but recommended for production)
+# traffic_shaping:
+#   all:
+#     global_rate_limit:
+#       capacity: 1000
+#       interval: 60s
+
+# Query limits for security
+limits:
+  max_depth: 100
+  max_height: 200
+  max_aliases: 30

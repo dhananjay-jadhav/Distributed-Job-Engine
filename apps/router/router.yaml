@@ -31,6 +31,8 @@ subgraphs:
       timeout: 5s
 
 # Headers propagation
+# NOTE: Development configuration - propagates all headers for ease of testing
+# For production, use router.production.yaml which explicitly lists allowed headers
 headers:
   # Propagate all headers from the client to subgraphs
   all:

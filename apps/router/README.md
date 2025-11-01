@@ -184,6 +184,30 @@ query {
 
 ## Configuration
 
+### Configuration Files
+
+Two router configuration files are provided:
+
+1. **`router.yaml`** - Development configuration
+   - Introspection enabled for easier debugging
+   - Propagates all headers for convenience
+   - Homepage/playground enabled
+   - Suitable for local development
+
+2. **`router.production.yaml`** - Production configuration
+   - Introspection disabled for security
+   - Explicitly lists allowed headers (authorization, cookie, etc.)
+   - Homepage disabled
+   - Query limits configured
+   - Rate limiting examples included
+   - Use this for staging/production deployments
+
+To use the production config:
+```bash
+# In Dockerfile or docker-compose
+ENV APOLLO_ROUTER_CONFIG_PATH=/dist/config/router.production.yaml
+```
+
 ### Subgraph Endpoints
 
 The router is configured to connect to:
@@ -222,7 +246,24 @@ cors:
 
 ### Headers Propagation
 
-All headers from client requests are automatically propagated to subgraphs. This ensures authentication tokens and other headers reach the appropriate services.
+**Development (`router.yaml`):**
+All headers from client requests are automatically propagated to subgraphs for ease of testing.
+
+**Production (`router.production.yaml`):**
+Only specific headers are propagated for security:
+- `authorization` - JWT/Bearer tokens
+- `cookie` - Session cookies
+- `x-request-id` - Request tracking
+- `x-forwarded-for` - Client IP forwarding
+
+To add more headers in production, update `router.production.yaml`:
+```yaml
+headers:
+  all:
+    request:
+      - propagate:
+          named: "your-header-name"
+```
 
 ## Development Workflow
 
