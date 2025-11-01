@@ -28,8 +28,8 @@ echo "✅ Rover CLI found: $(rover --version)"
 echo ""
 
 # Define subgraph schemas
-AUTH_SCHEMA="${SCRIPT_DIR}/../../auth-api/src/schema.gql"
-JOBS_SCHEMA="${SCRIPT_DIR}/../../jobs-api/src/schema.gql"
+AUTH_SCHEMA="${SCRIPT_DIR}/../auth-api/src/schema.gql"
+JOBS_SCHEMA="${SCRIPT_DIR}/../jobs-api/src/schema.gql"
 
 # Check if schema files exist
 if [ ! -f "$AUTH_SCHEMA" ]; then
