@@ -12,12 +12,21 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
                             │
                             │ HTTP/GraphQL
                             │
+                            ▼
+                   ┌────────────────┐
+                   │ Apollo Gateway │
+                   │   Port: 4000   │
+                   │  (Supergraph)  │
+                   └────────┬───────┘
+                            │
+                            │ Introspect & Compose
+                            │
         ┌───────────────────┼───────────────────┐
         │                   │                   │
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌──────────────┐   ┌──────────────┐
-│  Auth Service │   │ Jobs Service │   │ API Gateway  │
-│  Port: 3000   │   │ Port: 3001   │   │  (Future)    │
+│  Auth Subgraph│   │ Jobs Subgraph│   │   Future     │
+│  Port: 3000   │   │ Port: 3001   │   │  Subgraphs   │
 └───────┬───────┘   └──────┬───────┘   └──────────────┘
         │                  │
         │ GraphQL          │ GraphQL
@@ -162,11 +171,12 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 
 ## 🚀 Features
 
+- **Apollo Gateway**: Unified GraphQL API gateway that combines multiple subgraphs into a single supergraph
 - **Microservices Architecture**: Built using NestJS with Nx monorepo for scalable microservices
 - **Authentication System**: JWT-based authentication with GraphQL Federation and gRPC
 - **Job Processing Engine**: Dynamic job discovery and execution system with metadata-driven architecture
 - **Event-Driven Architecture**: Apache Pulsar integration for reliable event streaming and message publishing
-- **GraphQL Federation**: Apollo Federation v2 for distributed GraphQL architecture
+- **GraphQL Federation**: Apollo Federation v2 for distributed GraphQL architecture with supergraph composition
 - **Database Management**: PostgreSQL with Prisma ORM for type-safe database access
 - **Observability**: Integrated logging with Pino and monitoring with New Relic
 - **Modern Stack**: TypeScript, NestJS, GraphQL, gRPC, Prisma, Apache Pulsar
@@ -258,6 +268,34 @@ yarn auth-migrate
 
 ### Development Mode
 
+#### Option 1: Using Apollo Gateway (Recommended)
+
+1. Start the authentication service:
+
+```bash
+yarn nx serve auth-api
+# Runs on http://localhost:3000/api
+```
+
+2. Start the jobs service:
+
+```bash
+yarn nx serve jobs-api
+# Runs on http://localhost:3001/api
+```
+
+3. Start the Apollo Gateway:
+
+```bash
+yarn nx serve gateway
+# Runs on http://localhost:4000/api/graphql
+# This provides a unified GraphQL endpoint for all services
+```
+
+#### Option 2: Direct Subgraph Access
+
+You can also access the subgraphs directly without the gateway:
+
 1. Start the authentication service:
 
 ```bash
@@ -277,6 +315,7 @@ yarn nx serve jobs-api
 Build all applications:
 
 ```bash
+yarn nx build gateway
 yarn nx build auth-api
 yarn nx build jobs-api
 ```
@@ -354,7 +393,11 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 ```
 .
 ├── apps/
-│   ├── auth-api/            # Authentication service (GraphQL + gRPC)
+│   ├── gateway/             # Apollo Gateway (Supergraph)
+│   │   ├── src/app/        # Gateway module configuration
+│   │   └── src/health/     # Health check endpoints
+│   ├── gateway-e2e/        # E2E tests for gateway
+│   ├── auth-api/           # Authentication service (GraphQL + gRPC)
 │   │   ├── src/auth/       # Auth resolvers and controllers
 │   │   ├── src/users/      # Users resolvers
 │   │   └── src/health/     # Health check endpoints
@@ -377,10 +420,22 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 
 ## 📖 API Documentation
 
-The project uses GraphQL Federation with multiple services:
+The project uses Apollo Gateway with GraphQL Federation to provide a unified API:
 
-### Authentication Service
-GraphQL endpoint: `http://localhost:3000/api/graphql`
+### Apollo Gateway (Recommended)
+**GraphQL endpoint:** `http://localhost:4000/api/graphql`
+
+The gateway provides a unified supergraph that combines all subgraphs (Auth and Jobs) into a single endpoint. **This is the recommended way to access the API** as it provides a complete view of the entire schema.
+
+**Available Operations:**
+- All authentication operations (login, createUser, user)
+- All job operations (jobs, executeJob)
+- Cross-service queries spanning multiple subgraphs
+
+**Health Check:** `http://localhost:4000/health`
+
+### Authentication Subgraph (Direct Access)
+**GraphQL endpoint:** `http://localhost:3000/api/graphql`
 
 **Mutations:**
 - `login(loginInput: LoginInput!)`: Authenticate user and receive JWT token
@@ -389,8 +444,8 @@ GraphQL endpoint: `http://localhost:3000/api/graphql`
 **Queries:**
 - `user(userId: String!)`: Get user by ID (requires authentication)
 
-### Jobs Service
-GraphQL endpoint: `http://localhost:3001/api/graphql`
+### Jobs Subgraph (Direct Access)
+**GraphQL endpoint:** `http://localhost:3001/api/graphql`
 
 **Queries:**
 - `jobs(jobsFilter: JobsFilter)`: List all available jobs with optional filtering (requires authentication)
@@ -400,9 +455,10 @@ GraphQL endpoint: `http://localhost:3001/api/graphql`
 
 ### GraphQL Playground
 
-Both services provide an Apollo Sandbox interface for testing queries. Access them at:
-- Auth: `http://localhost:3000/api/graphql`
-- Jobs: `http://localhost:3001/api/graphql`
+All services provide an Apollo Sandbox interface for testing queries. Access them at:
+- **Gateway (Recommended):** `http://localhost:4000/api/graphql`
+- Auth Subgraph: `http://localhost:3000/api/graphql`
+- Jobs Subgraph: `http://localhost:3001/api/graphql`
 
 ## 📮 Apache Pulsar Integration
 
