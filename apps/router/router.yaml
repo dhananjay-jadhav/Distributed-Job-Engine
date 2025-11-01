@@ -1,0 +1,60 @@
+supergraph:
+  # The socket address and port to listen on
+  listen: 0.0.0.0:4000
+  # Introspection is enabled by default for local development
+  introspection: true
+
+# CORS configuration
+cors:
+  origins:
+    - https://studio.apollographql.com
+  allow_credentials: true
+
+# Subgraph configuration
+subgraphs:
+  auth:
+    routing_url: http://auth-api:3000/api/graphql
+    # Health check configuration
+    health_check:
+      enabled: true
+      path: /api/health
+      interval: 10s
+      timeout: 5s
+
+  jobs:
+    routing_url: http://jobs-api:3001/api/graphql
+    # Health check configuration
+    health_check:
+      enabled: true
+      path: /api/health
+      interval: 10s
+      timeout: 5s
+
+# Headers propagation
+headers:
+  # Propagate all headers from the client to subgraphs
+  all:
+    request:
+      - propagate:
+          matching: ".*"
+
+# Telemetry and logging
+telemetry:
+  instrumentation:
+    spans:
+      mode: spec_compliant
+  exporters:
+    logging:
+      stdout:
+        enabled: true
+        format: json
+
+# Health check endpoint for the router itself
+health_check:
+  enabled: true
+  listen: 0.0.0.0:8088
+  path: /health
+
+# Homepage with GraphQL Playground
+homepage:
+  enabled: true

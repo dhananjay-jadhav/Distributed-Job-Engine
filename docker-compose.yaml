@@ -29,3 +29,33 @@ services:
       - pulsar
     environment:
       SPRING_CONFIGURATION_FILE: /pulsar-manager/pulsar-manager/application.properties
+
+  # Apollo Router - GraphQL Federation Gateway
+  # Note: Requires auth-api and jobs-api to be running
+  # Run with: docker compose up router
+  router:
+    build:
+      context: ./apps/router
+      dockerfile: Dockerfile
+    container_name: apollo-router
+    ports:
+      - '4000:4000'  # GraphQL API
+      - '8088:8088'  # Health check endpoint
+    volumes:
+      - ./apps/router/supergraph-schema.graphql:/dist/config/supergraph-schema.graphql:ro
+      - ./apps/router/router.yaml:/dist/config/router.yaml:ro
+    environment:
+      APOLLO_ROUTER_CONFIG_PATH: /dist/config/router.yaml
+      APOLLO_ROUTER_SUPERGRAPH_PATH: /dist/config/supergraph-schema.graphql
+      RUST_LOG: info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8088/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    extra_hosts:
+      # For local development, map service names to host machine
+      - "auth-api:host-gateway"
+      - "jobs-api:host-gateway"

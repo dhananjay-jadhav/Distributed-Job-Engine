@@ -11,20 +11,29 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 └───────────────────────────┬─────────────────────────────────────────┘
                             │
                             │ HTTP/GraphQL
+                            │ Port: 4000
+                            ▼
+                ┌───────────────────────┐
+                │   Apollo Router       │
+                │   (Supergraph)        │
+                │   - Query Planning    │
+                │   - Federation        │
+                │   - Response Merge    │
+                └───────────┬───────────┘
                             │
         ┌───────────────────┼───────────────────┐
         │                   │                   │
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌──────────────┐   ┌──────────────┐
-│  Auth Service │   │ Jobs Service │   │ API Gateway  │
-│  Port: 3000   │   │ Port: 3001   │   │  (Future)    │
+│  Auth Service │   │ Jobs Service │   │   Future     │
+│  Port: 3000   │   │ Port: 3001   │   │  Services    │
 └───────┬───────┘   └──────┬───────┘   └──────────────┘
         │                  │
         │ GraphQL          │ GraphQL
         │ Federation v2    │ Federation v2
         │                  │
 ┌───────┴──────────────────┴───────┐
-│   GraphQL Federation Layer       │
+│   GraphQL Subgraph Layer         │
 │   (Apollo Federation v2)         │
 └──────────────┬───────────────────┘
                │
@@ -58,6 +67,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 ┌─────────────────────────────────────────┐
 │         Supporting Services             │
 ├─────────────────────────────────────────┤
+│  • Apollo Router (Federation Gateway)   │
 │  • Pino Logger (Structured Logging)     │
 │  • New Relic (APM & Monitoring)         │
 │  • JWT Auth (Passport Strategy)         │
@@ -163,6 +173,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 ## 🚀 Features
 
 - **Microservices Architecture**: Built using NestJS with Nx monorepo for scalable microservices
+- **Apollo Router Supergraph**: High-performance GraphQL gateway for unified API access
 - **Authentication System**: JWT-based authentication with GraphQL Federation and gRPC
 - **Job Processing Engine**: Dynamic job discovery and execution system with metadata-driven architecture
 - **Event-Driven Architecture**: Apache Pulsar integration for reliable event streaming and message publishing
@@ -175,6 +186,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 
 - **Backend Framework**: NestJS
 - **Monorepo Tool**: Nx
+- **API Gateway**: Apollo Router
 - **API**: GraphQL with Apollo Federation v2
 - **Authentication**: JWT with Passport
 - **Database**: PostgreSQL
@@ -192,6 +204,7 @@ A modern distributed job processing engine built with NestJS, GraphQL Federation
 - Node.js (v20 or later)
 - Yarn package manager (v4.10.3 or later)
 - Docker and Docker Compose
+- Apollo Rover CLI (for composing the supergraph schema)
 - PostgreSQL (or use Docker Compose setup)
 - Apache Pulsar (or use Docker Compose setup)
 - Kubernetes cluster (optional, for production deployment)
@@ -254,6 +267,23 @@ This will start:
 yarn auth-migrate
 ```
 
+6. Install Apollo Rover CLI (for composing the supergraph):
+
+**Recommended (via curl):**
+```bash
+curl -sSL https://rover.apollo.dev/nix/latest | sh
+```
+
+**Alternative (via npm):**
+```bash
+npm install -g @apollo/rover
+```
+
+**Verify installation:**
+```bash
+rover --version
+```
+
 ## 🚀 Running the Application
 
 ### Development Mode
@@ -271,6 +301,29 @@ yarn nx serve auth-api
 yarn nx serve jobs-api
 # Runs on http://localhost:3001/api
 ```
+
+3. Compose the supergraph schema and start Apollo Router:
+
+```bash
+# Compose the supergraph schema from subgraphs
+cd apps/router
+./compose-supergraph.sh
+
+# Start the Apollo Router
+cd ../..
+docker compose up router
+# Runs on http://localhost:4000
+```
+
+**Access the unified GraphQL API:**
+- Apollo Router: http://localhost:4000
+- Health Check: http://localhost:8088/health
+
+### Alternative: Direct Subgraph Access (without Router)
+
+You can also access subgraphs directly during development:
+- Auth Service: http://localhost:3000/api/graphql
+- Jobs Service: http://localhost:3001/api/graphql
 
 ### Building for Production
 
@@ -362,7 +415,12 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 │   ├── jobs-api/           # Jobs service (GraphQL)
 │   │   ├── src/api/        # Jobs resolvers
 │   │   └── src/health/     # Health check endpoints
-│   └── jobs-api-e2e/       # E2E tests for jobs service
+│   ├── jobs-api-e2e/       # E2E tests for jobs service
+│   └── router/             # Apollo Router configuration
+│       ├── router.yaml     # Router configuration
+│       ├── Dockerfile      # Docker image for router
+│       ├── compose-supergraph.sh  # Schema composition script
+│       └── README.md       # Router documentation
 ├── libs/
 │   ├── apache-pulsar/      # Apache Pulsar client integration
 │   ├── auth-db/            # Database module with Prisma
@@ -371,16 +429,47 @@ For detailed testing instructions, see [TESTING.md](TESTING.md).
 │   ├── jobs/               # Jobs execution engine and discovery
 │   ├── proto/              # Protocol Buffers definitions for gRPC
 │   └── users/              # Users business logic
-├── docker-compose.yaml     # PostgreSQL and Apache Pulsar setup
+├── docker-compose.yaml     # Services: PostgreSQL, Pulsar, Router
 └── README.md
 ```
 
 ## 📖 API Documentation
 
-The project uses GraphQL Federation with multiple services:
+The project uses GraphQL Federation with multiple services unified through Apollo Router.
 
-### Authentication Service
-GraphQL endpoint: `http://localhost:3000/api/graphql`
+### Apollo Router (Supergraph)
+**Unified GraphQL endpoint:** `http://localhost:4000`
+
+This is the recommended entry point for all GraphQL queries. The router automatically:
+- Routes queries to appropriate subgraphs (auth-api, jobs-api)
+- Handles query planning and execution
+- Merges responses from multiple subgraphs
+- Provides a unified schema across all services
+
+**Example unified query:**
+```graphql
+query {
+  # From auth subgraph
+  user(userId: "user-id") {
+    id
+    email
+  }
+  
+  # From jobs subgraph
+  jobs {
+    name
+    description
+  }
+}
+```
+
+**Access points:**
+- GraphQL API: `http://localhost:4000`
+- Health Check: `http://localhost:8088/health`
+- Interactive Explorer: `http://localhost:4000` (in browser)
+
+### Authentication Service (Subgraph)
+Direct GraphQL endpoint: `http://localhost:3000/api/graphql`
 
 **Mutations:**
 - `login(loginInput: LoginInput!)`: Authenticate user and receive JWT token
@@ -389,8 +478,8 @@ GraphQL endpoint: `http://localhost:3000/api/graphql`
 **Queries:**
 - `user(userId: String!)`: Get user by ID (requires authentication)
 
-### Jobs Service
-GraphQL endpoint: `http://localhost:3001/api/graphql`
+### Jobs Service (Subgraph)
+Direct GraphQL endpoint: `http://localhost:3001/api/graphql`
 
 **Queries:**
 - `jobs(jobsFilter: JobsFilter)`: List all available jobs with optional filtering (requires authentication)
@@ -400,9 +489,14 @@ GraphQL endpoint: `http://localhost:3001/api/graphql`
 
 ### GraphQL Playground
 
-Both services provide an Apollo Sandbox interface for testing queries. Access them at:
-- Auth: `http://localhost:3000/api/graphql`
-- Jobs: `http://localhost:3001/api/graphql`
+**Recommended:** Use the Apollo Router endpoint for a unified experience:
+- **Router:** `http://localhost:4000` (unified access to all services)
+
+**For development/debugging:** Access subgraphs directly:
+- **Auth:** `http://localhost:3000/api/graphql`
+- **Jobs:** `http://localhost:3001/api/graphql`
+
+For detailed router configuration and advanced usage, see [apps/router/README.md](apps/router/README.md).
 
 ## 📮 Apache Pulsar Integration
 
