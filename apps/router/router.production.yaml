@@ -4,11 +4,14 @@ supergraph:
   # IMPORTANT: Disable introspection in production for security
   introspection: false
 
-# CORS configuration - Update with your production domains
+# CORS configuration - UPDATE THESE VALUES FOR YOUR PRODUCTION ENVIRONMENT
+# DO NOT deploy with example domains
 cors:
   origins:
+    # Replace with your actual production domains before deployment
     - https://your-production-domain.com
     - https://your-staging-domain.com
+    # Or use environment variable: ${APOLLO_ROUTER_CORS_ORIGINS}
   allow_credentials: true
 
 # Subgraph configuration

@@ -50,6 +50,7 @@ echo "  - Jobs: $JOBS_SCHEMA"
 echo ""
 
 # Create a temporary supergraph config file
+# Using mktemp with template for better cross-platform compatibility
 TEMP_CONFIG=$(mktemp -t compose-supergraph.XXXXXX)
 cat > "$TEMP_CONFIG" << EOF
 federation_version: =2.11.2
