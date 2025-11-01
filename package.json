@@ -13,7 +13,13 @@
     "format": "nx format:write",
     "auth-migrate": "nx migrate-prisma auth-db",
     "prepare": "husky",
-    "gen:proto-types": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./libs/proto/src/types -I ./libs/proto/src/proto ./libs/proto/src/proto/*.proto --ts_proto_opt=nestJs=true"
+    "gen:proto-types": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./libs/proto/src/types -I ./libs/proto/src/proto ./libs/proto/src/proto/*.proto --ts_proto_opt=nestJs=true",
+    "router:compose": "cd apps/router && ./compose-supergraph.sh",
+    "router:start": "docker compose up router",
+    "router:build": "docker compose build router",
+    "router:restart": "docker compose restart router",
+    "router:logs": "docker compose logs -f router",
+    "router:stop": "docker compose stop router"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
